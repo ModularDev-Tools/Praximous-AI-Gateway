@@ -110,7 +110,34 @@ Tasks:
 
 ✅ Milestone: MVP is packaged and deployable in 5 minutes, with a demo Smart Skill working out of the box.
 
-Phase 5: 📈 Commercialization & Go-to-Market
+Phase 5: 🎨 Advanced GUI & User Experience
+
+Goal: Develop a rich, intuitive, and responsive graphical user interface (GUI) for Praximous, enhancing user interaction, system administration, and data visualization. This phase aims to move beyond basic API interactions to a full-fledged web application experience.
+
+Tasks:
+
+    [✓] Select Frontend Framework: (Chosen: React)
+        Evaluated and chose React for its robust ecosystem, component-based architecture, and suitability for building interactive dashboards and management UIs.
+
+    [ ] Main Application Dashboard:
+        Design and implement a central dashboard providing an overview of system status, recent activity, and quick access to key features.
+        Include the basic task submission GUI developed earlier, but enhance it within the new framework.
+
+    [ ] Interactive Analytics Dashboard:
+        Build a dynamic interface to visualize audit logs and analytics data.
+        Include features like date range filtering, charting of usage patterns (e.g., requests per provider, tasks over time), and detailed log inspection.
+        (Supersedes "Analytics Dashboard" from Post-MVP)
+
+    [ ] Skill Library Management UI:
+        Create an admin interface to view registered Smart Skills, their capabilities, and potentially manage skill configurations (if applicable in the future).
+        (Supersedes "Skill Library UI" from Post-MVP)
+
+    [ ] Provider & Routing Configuration UI (Optional - Advanced):
+        Consider a UI for viewing (and potentially editing, with appropriate safeguards) `providers.yaml` and `ModelRouter` rules.
+
+✅ Milestone: Praximous features a comprehensive and user-friendly GUI, allowing users to easily submit tasks, monitor system activity, analyze usage patterns, and manage skills, significantly improving the overall user experience and administrative efficiency.
+
+Phase 6: 📈 Commercialization & Go-to-Market
 
 Goal: Implement the business logic, licensing system, and online presence required for commercial sales and product-led growth.
 
@@ -149,6 +176,7 @@ Tasks:
         Launch a blog to post product updates and thought leadership articles.
 
 ✅ Milestone: Praximous is a commercially viable product. The website can handle automated sales, license provisioning, and customer self-service, enabling a scalable go-to-market strategy.
+
 
 Post-MVP Next Steps
 

@@ -1,0 +1,100 @@
+/* General Dashboard Styles */
+.dashboard-container {
+  font-family: sans-serif;
+  color: #333;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-header h1 {
+  color: #2c3e50;
+}
+
+.dashboard-main {
+  display: grid;
+  grid-template-columns: 1fr; /* Single column for now, can be 2fr 1fr for sidebars */
+  gap: 30px;
+}
+
+.dashboard-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.dashboard-section h2 {
+  margin-top: 0;
+  color: #34495e;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Task Form Styles */
+.task-form .form-group {
+  margin-bottom: 15px;
+}
+
+.task-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.task-form input[type="text"],
+.task-form textarea {
+  width: calc(100% - 22px);
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.task-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.task-form button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.task-form button:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.task-form button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Response Area Styles (similar to your basic GUI) */
+.response-area {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+.response-area.success { color: #3c763d; background-color: #dff0d8; border-left: 5px solid #5cb85c; }
+.response-area.error { color: #a94442; background-color: #f2dede; border-left: 5px solid #d9534f; }
+.loading-message { margin-top: 10px; color: #7f8c8d; }

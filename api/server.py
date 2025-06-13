@@ -56,24 +56,32 @@ app = FastAPI(
     description="Secure, On-Premise AI Gateway"
 )
 
-# --- NEW: Setup for serving the basic GUI ---
+# --- UPDATED: Setup for serving the React GUI ---
 # Determine the project root directory relative to this file (api/server.py)
 # server.py -> api -> project_root
 PROJECT_ROOT_DIR = Path(__file__).resolve().parent.parent
-STATIC_GUI_DIR = PROJECT_ROOT_DIR / "static_gui"
+REACT_APP_BUILD_DIR = PROJECT_ROOT_DIR / "frontend-react" / "dist"
 
-# Mount the directory containing CSS and JS files for the GUI
-# These will be accessible under "/static-gui-assets" path
-app.mount("/static-gui-assets", StaticFiles(directory=STATIC_GUI_DIR), name="static_gui_assets")
+# Serve static assets (JS, CSS, images) from the React app's build output.
+# Vite typically places these in an 'assets' subfolder within 'dist'.
+# Adjust the path if your Vite build configuration is different.
+if (REACT_APP_BUILD_DIR / "assets").is_dir():
+    app.mount("/assets", StaticFiles(directory=(REACT_APP_BUILD_DIR / "assets")), name="react-assets")
+else:
+    log.warning(f"React assets directory not found at {REACT_APP_BUILD_DIR / 'assets'}. GUI may not load correctly.")
 
-# Endpoint to serve the main HTML page for the GUI
-@app.get("/gui", response_class=HTMLResponse, include_in_schema=False)
-async def serve_gui_index():
-    index_html_path = STATIC_GUI_DIR / "index.html"
+# Serve the main index.html for any other GET request that doesn't match an API route.
+# This allows client-side routing in the React app to function correctly.
+@app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
+async def serve_react_app(full_path: str): # full_path is not used but required by FastAPI for path parameters
+    index_html_path = REACT_APP_BUILD_DIR / "index.html"
     if not index_html_path.is_file():
-        return HTMLResponse(content="GUI main page not found.", status_code=404)
+        log.error(f"React app index.html not found at {index_html_path}. Ensure the React app is built.")
+        # You might want to return a more user-friendly error page or a simple text response
+        return HTMLResponse(content="Praximous React App not found. Please build the frontend application.", status_code=404)
     return HTMLResponse(content=index_html_path.read_text())
-# --- END NEW GUI SETUP ---
+# --- END UPDATED REACT GUI SETUP ---
+
 # ... (process_task endpoint is unchanged from the last step) ...
 @app.post("/api/v1/process", response_model=ProcessResponse)
 async def process_task(request: ProcessRequest):
