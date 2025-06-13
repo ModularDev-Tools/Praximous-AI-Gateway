@@ -4,6 +4,8 @@ import os
 import yaml
 from typing import Dict, Any, Type, Optional
 
+import google.generativeai as genai
+import httpx # For OllamaProvider
 from core.logger import log
 
 PROVIDERS_CONFIG_PATH = os.path.join('config', 'providers.yaml')
@@ -24,33 +26,72 @@ class GeminiProvider(BaseLLMProvider):
     """Provider for Google Gemini models."""
     def __init__(self, name: str, config: Dict[str, Any]):
         super().__init__(name, config)
-        # Specific Gemini client initialization would go here
-        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.api_key_env_var = self.config.get("api_key_env", "GEMINI_API_KEY") # Get from config, default to GEMINI_API_KEY
+        self.api_key = os.getenv(self.api_key_env_var)
         if not self.api_key:
-            log.error("GEMINI_API_KEY not found in environment variables.")
-            raise ValueError("Missing GEMINI_API_KEY")
+            log.error(f"{self.api_key_env_var} not found in environment variables for provider {self.name}.")
+            raise ValueError(f"Missing {self.api_key_env_var} for {self.name}")
+        
+        genai.configure(api_key=self.api_key)
+        self.model_name = self.config.get("model", "gemini-1.5-flash-latest") # Get model from config
+        try:
+            self.client = genai.GenerativeModel(self.model_name)
+            log.info(f"GeminiProvider ({self.name}) initialized with model: {self.model_name}")
+        except Exception as e:
+            log.error(f"Failed to initialize Gemini GenerativeModel for {self.name} with model {self.model_name}: {e}")
+            raise ValueError(f"Failed to initialize Gemini client for {self.name}: {e}")
 
     async def generate_async(self, prompt: str, **kwargs) -> Dict[str, Any]:
-        log.info(f"GeminiProvider ({self.name}) generating response...")
-        # Placeholder for actual Gemini API call
-        # You would use a library like 'google.generativeai' here
-        return {"provider": self.name, "text": f"Response from Gemini for: '{prompt}'"}
+        log.info(f"GeminiProvider ({self.name}) generating response for model {self.model_name}...")
+        try:
+            # For simplicity, directly using generate_content_async.
+            # You might want to handle different types of content, safety settings, etc.
+            response = await self.client.generate_content_async(prompt)
+            return {"provider": self.name, "text": response.text}
+        except Exception as e:
+            log.error(f"Error during Gemini API call for provider {self.name}: {e}", exc_info=True)
+            # Re-raise or return a structured error
+            raise # Or return {"provider": self.name, "error": str(e)}
 
 class OllamaProvider(BaseLLMProvider):
     """Provider for local Ollama models."""
     def __init__(self, name: str, config: Dict[str, Any]):
         super().__init__(name, config)
-        # Specific Ollama client initialization would go here
-        self.base_url = os.getenv("OLLAMA_API_URL")
+        self.base_url_env_var = self.config.get("base_url_env", "OLLAMA_API_URL")
+        self.base_url = os.getenv(self.base_url_env_var)
         if not self.base_url:
-            log.error("OLLAMA_API_URL not found in environment variables.")
-            raise ValueError("Missing OLLAMA_API_URL")
+            log.error(f"{self.base_url_env_var} not found in environment variables for provider {self.name}.")
+            raise ValueError(f"Missing {self.base_url_env_var} for {self.name}")
+        self.model_name = self.config.get("model", "llama3") # Get model from config
+        self.ollama_api_endpoint = f"{self.base_url.rstrip('/')}/api/generate"
+        log.info(f"OllamaProvider ({self.name}) initialized with model: {self.model_name}, endpoint: {self.ollama_api_endpoint}")
 
     async def generate_async(self, prompt: str, **kwargs) -> Dict[str, Any]:
-        log.info(f"OllamaProvider ({self.name}) generating response...")
-        # Placeholder for actual Ollama API call
-        # You would use a library like 'httpx' to call the Ollama endpoint
-        return {"provider": self.name, "text": f"Response from Ollama for: '{prompt}'"}
+        log.info(f"OllamaProvider ({self.name}) generating response for model {self.model_name}...")
+        payload = {
+            "model": self.model_name,
+            "prompt": prompt,
+            "stream": False  # For simplicity, not handling streaming responses here
+        }
+        # Add any additional kwargs to the payload if they are relevant for Ollama
+        # For example, options like "temperature", "top_p", etc.
+        # payload.update({k: v for k, v in kwargs.items() if k in RELEVANT_OLLAMA_OPTIONS})
+
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client: # Increased timeout for potentially slower local models
+                response = await client.post(self.ollama_api_endpoint, json=payload)
+                response.raise_for_status()  # Raise an exception for HTTP 4xx/5xx errors
+                
+                response_data = response.json()
+                # Ollama's non-streaming response typically has the full text in 'response'
+                generated_text = response_data.get("response", "")
+                return {"provider": self.name, "text": generated_text.strip()}
+        except httpx.HTTPStatusError as e:
+            log.error(f"HTTP error during Ollama API call for provider {self.name}: {e.response.status_code} - {e.response.text}", exc_info=True)
+            raise # Or return {"provider": self.name, "error": f"HTTP error: {e.response.status_code}"}
+        except Exception as e:
+            log.error(f"Error during Ollama API call for provider {self.name}: {e}", exc_info=True)
+            raise # Or return {"provider": self.name, "error": str(e)}
 
 
 class ProviderManager:

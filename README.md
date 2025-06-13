@@ -108,7 +108,28 @@ The gateway is now running and accessible.
 
 ### View Skills
 - **GET** `/api/v1/skills`
-- **Description**: Lists all registered Smart Skills and their capabilities.
+
+## 🛠️ Management Commands
+
+Praximous provides a few command-line utilities for managing your instance, run via `python main.py` (or `docker-compose run --rm praximous python main.py <command>` if you prefer to use the Docker environment).
+
+### Initialize Identity (as in Quickstart)
+```bash
+python main.py --init
+```
+Sets up the initial `config/identity.yaml` and guides through API key configuration.
+
+### Rename System
+```bash
+python main.py --rename "New-System-Identifier"
+```
+Updates the `system_name` in your `config/identity.yaml`. The display name in logs will update on the next application restart.
+
+### Reset Identity
+```bash
+python main.py --reset-identity
+```
+Prompts for confirmation and then deletes the `config/identity.yaml` file, allowing you to re-initialize from scratch. Use with caution.
 
 ---
 ## 🧭 Development Roadmap

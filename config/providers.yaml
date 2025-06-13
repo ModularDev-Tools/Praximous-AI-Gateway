@@ -6,13 +6,14 @@ providers:
     model: "gemini-1.5-flash-latest" # Updated to use Gemini 1.5 Flash
     api_key_env: "GEMINI_API_KEY" # The name of the environment variable holding the API key
     priority: 1                # Lower number means higher priority for selection/failover
+    enabled: true              # Enable # backend testing for Ollama
     # Fields below are primarily for the `python main.py --init` interactive setup
     env_var: "GEMINI_API_KEY"  # Used by setup_api_credentials for prompting
     prompt_text: "Gemini API Key (e.g., for gemini-pro model)"
 
   - name: "ollama_default"
     type: "ollama"
-    model: "llama3"            # The Ollama model you want to use (ensure it's pulled in your Ollama instance)
+    model: "mistral"           # Changed to use mistral
     base_url_env: "OLLAMA_API_URL" # The name of the environment variable holding the Ollama server URL
     priority: 2
     # Fields for `python main.py --init`

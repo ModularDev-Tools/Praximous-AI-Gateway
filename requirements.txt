@@ -6,3 +6,4 @@ PyYAML==6.0.1
 pytest==7.4.2
 httpx==0.25.0
 pytest-mock==3.11.1
+google-generativeai==0.5.4 # Or the latest version
