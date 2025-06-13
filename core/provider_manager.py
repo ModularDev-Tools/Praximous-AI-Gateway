@@ -74,21 +74,38 @@ class ProviderManager:
                 log.warning("Provider config is empty or missing 'providers' key.")
                 return
 
-            for provider_name, provider_config in config['providers'].items():
-                if provider_config.get("enabled", False):
-                    provider_class = self.PROVIDER_CLASSES.get(provider_name)
+            if not isinstance(config['providers'], list):
+                log.error("'providers' key in config/providers.yaml is not a list.")
+                return
+
+            for provider_config_entry in config['providers']: # Iterate over the list of provider configurations
+                if not isinstance(provider_config_entry, dict):
+                    log.warning(f"Skipping invalid provider entry (not a dictionary): {provider_config_entry}")
+                    continue
+
+                provider_instance_name = provider_config_entry.get('name')
+                provider_type = provider_config_entry.get('type')
+
+                if not provider_instance_name or not provider_type:
+                    log.warning(f"Skipping provider entry due to missing 'name' or 'type': {provider_config_entry}")
+                    continue
+
+                # Providers are enabled by default unless 'enabled: false' is explicitly set
+                if provider_config_entry.get("enabled", True):
+                    provider_class = self.PROVIDER_CLASSES.get(provider_type)
                     if provider_class:
                         try:
-                            self.providers[provider_name] = provider_class(name=provider_name, config=provider_config)
+                            # Pass the instance name and the full config dict for that provider
+                            self.providers[provider_instance_name] = provider_class(name=provider_instance_name, config=provider_config_entry)
                         except ValueError as ve:
                             # ValueErrors from provider __init__ are often due to missing env vars/config.
-                            log.error(f"Failed to initialize provider '{provider_name}' due to a configuration issue: {ve}")
+                            log.error(f"Failed to initialize provider '{provider_instance_name}' (type: {provider_type}) due to a configuration issue: {ve}")
                         except Exception as e: # For other unexpected errors during initialization
-                            log.error(f"An unexpected error occurred while initializing provider '{provider_name}': {e}", exc_info=True)
+                            log.error(f"An unexpected error occurred while initializing provider '{provider_instance_name}' (type: {provider_type}): {e}", exc_info=True)
                     else:
-                        log.warning(f"No provider class found for '{provider_name}'.")
+                        log.warning(f"No provider class found for type '{provider_type}' (name: '{provider_instance_name}').")
                 else:
-                    log.info(f"Provider '{provider_name}' is disabled in config.")
+                    log.info(f"Provider '{provider_instance_name}' (type: {provider_type}) is disabled in config.")
         except FileNotFoundError:
             log.error(f"Provider configuration file not found at '{PROVIDERS_CONFIG_PATH}'.")
         except Exception as e:

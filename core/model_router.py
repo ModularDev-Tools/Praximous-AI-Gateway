@@ -13,9 +13,9 @@ class ModelRouter:
         # For the MVP, we'll use a simple dictionary to define routing rules.
         # This can be expanded later to load from a YAML config file.
         self.routing_rules: Dict[str, List[str]] = {
-            "default_llm_tasks": ["gemini", "ollama"],
+            "default_llm_tasks": ["gemini_pro_model", "ollama_default"], # Use instance names from providers.yaml
             # Example of a task that should only use a local/cheap model
-            "internal_summary": ["ollama"],
+            "internal_summary": ["ollama_default"], # Use instance name
         }
         self.provider_manager = provider_manager
         log.info("ModelRouter initialized.")
