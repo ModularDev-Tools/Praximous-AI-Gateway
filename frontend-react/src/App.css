@@ -98,3 +98,66 @@
 .response-area.success { color: #3c763d; background-color: #dff0d8; border-left: 5px solid #5cb85c; }
 .response-area.error { color: #a94442; background-color: #f2dede; border-left: 5px solid #d9534f; }
 .loading-message { margin-top: 10px; color: #7f8c8d; }
+
+/* Recent Activity Styles */
+.activity-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.activity-item {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.activity-item span {
+  margin-right: 15px;
+}
+
+.activity-timestamp {
+  color: #777;
+  min-width: 160px; /* Give it some space */
+}
+
+.activity-item.status-success .activity-status { color: #3c763d; font-weight: bold; }
+.activity-item.status-error .activity-status { color: #a94442; font-weight: bold; }
+/* Add more status styles if needed */
+
+/* System Status Styles */
+.status-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.status-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.provider-name {
+  font-weight: bold;
+}
+
+.provider-details {
+  font-size: 0.85em;
+  color: #777;
+}
+
+.status-indicator-active .provider-status { color: #3c763d; } /* Green for Active */
+.status-indicator-disabled .provider-status { color: #777; }   /* Grey for Disabled */
+.status-indicator-error .provider-status { color: #a94442; }   /* Red for Error */

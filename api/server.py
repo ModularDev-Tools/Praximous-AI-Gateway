@@ -12,9 +12,11 @@ from typing import Dict, Any, Optional, List
 from core.logger import log
 from core.skill_manager import skill_manager
 from core.model_router import model_router, NoAvailableProviderError
-# --- MODIFIED: Import the new count function ---
+# --- MODIFIED: Import the new count function and provider_manager ---
 from core.audit_logger import log_interaction, get_all_interactions, count_interactions
-from pathlib import Path # --- NEW IMPORT FOR GUI ---
+from core.provider_manager import provider_manager, PROVIDERS_CONFIG_PATH # Import provider_manager
+from pathlib import Path
+import yaml # For reading providers.yaml
 
 # ... (ProcessRequest and ProcessResponse models are unchanged) ...
 class ArbitraryKwargsBaseModel(BaseModel):
@@ -48,6 +50,17 @@ class AnalyticsResponse(BaseModel):
     limit: int
     offset: int
     data: List[InteractionRecord]
+
+# --- NEW: System Status Models ---
+class ProviderStatus(BaseModel):
+    name: str
+    status: str # e.g., "Active", "Disabled", "Error"
+    details: Optional[str] = None
+
+class SystemStatusResponse(BaseModel):
+    providers_status: List[ProviderStatus]
+# --- END NEW SYSTEM STATUS MODELS ---
+
 # --- END MODIFIED ---
 
 app = FastAPI(
@@ -164,6 +177,44 @@ async def get_analytics_data(
         log.error(f"Failed to retrieve analytics data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve analytics data.")
 # --- END MODIFIED ---
+
+# --- NEW: System Status Endpoint ---
+@app.get("/api/v1/system-status", response_model=SystemStatusResponse, summary="Get the status of configured LLM providers")
+async def get_system_status():
+    provider_statuses: List[ProviderStatus] = []
+    try:
+        with open(PROVIDERS_CONFIG_PATH, 'r') as f:
+            config = yaml.safe_load(f)
+
+        if config and 'providers' in config and isinstance(config['providers'], list):
+            for provider_config_entry in config['providers']:
+                if not isinstance(provider_config_entry, dict):
+                    continue
+                
+                name = provider_config_entry.get('name')
+                if not name:
+                    continue
+
+                is_enabled_in_config = provider_config_entry.get("enabled", True) # Default to True if 'enabled' key is missing
+                
+                if not is_enabled_in_config:
+                    provider_statuses.append(ProviderStatus(name=name, status="Disabled", details="Disabled in configuration."))
+                else:
+                    # Check if the provider was successfully initialized by ProviderManager
+                    if provider_manager.get_provider(name):
+                        provider_statuses.append(ProviderStatus(name=name, status="Active", details="Initialized and active."))
+                    else:
+                        # Enabled in config but not found in initialized providers means an initialization error occurred
+                        provider_statuses.append(ProviderStatus(name=name, status="Error", details="Failed to initialize (e.g., missing API key or configuration issue). Check server logs."))
+        else:
+            log.warning("providers.yaml not found or improperly formatted for system status check.")
+            # Optionally return an empty list or a specific message
+
+    except Exception as e:
+        log.error(f"Error fetching system status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve system status.")
+    return SystemStatusResponse(providers_status=provider_statuses)
+# --- END NEW SYSTEM STATUS ENDPOINT ---
 
 # ... (list_skills_capabilities and get_skill_capabilities endpoints are unchanged) ...
 @app.get("/api/v1/skills", summary="List all available skills and their capabilities")
