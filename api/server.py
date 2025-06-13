@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 # --- NEW IMPORTS FOR GUI ---
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse # Added FileResponse
 from typing import Dict, Any, Optional, List
 
 from core.logger import log
@@ -86,13 +86,22 @@ else:
 # Serve the main index.html for any other GET request that doesn't match an API route.
 # This allows client-side routing in the React app to function correctly.
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
-async def serve_react_app(full_path: str): # full_path is not used but required by FastAPI for path parameters
+async def serve_react_app(full_path: str):
     index_html_path = REACT_APP_BUILD_DIR / "index.html"
+    # Attempt to serve a static file if full_path points to an existing file in the build directory
+    # e.g., /vite.svg should serve REACT_APP_BUILD_DIR/vite.svg
+    potential_static_file = (REACT_APP_BUILD_DIR / full_path.lstrip("/")).resolve()
+
+    # Security check: ensure the resolved path is still within REACT_APP_BUILD_DIR
+    if potential_static_file.is_file() and str(potential_static_file).startswith(str(REACT_APP_BUILD_DIR.resolve())):
+        # Let FileResponse guess the media type based on the file extension
+        return FileResponse(potential_static_file)
+
+    # Fallback to serving index.html for SPA routing if no specific file matched
     if not index_html_path.is_file():
         log.error(f"React app index.html not found at {index_html_path}. Ensure the React app is built.")
-        # You might want to return a more user-friendly error page or a simple text response
         return HTMLResponse(content="Praximous React App not found. Please build the frontend application.", status_code=404)
-    return HTMLResponse(content=index_html_path.read_text())
+    return FileResponse(index_html_path) # Serve index.html using FileResponse
 # --- END UPDATED REACT GUI SETUP ---
 
 # ... (process_task endpoint is unchanged from the last step) ...

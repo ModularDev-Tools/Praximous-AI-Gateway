@@ -119,9 +119,9 @@ Tasks:
     [✓] Select Frontend Framework: (Chosen: React)
         Evaluated and chose React for its robust ecosystem, component-based architecture, and suitability for building interactive dashboards and management UIs.
 
-    [ ] Main Application Dashboard:
+    [✓] Main Application Dashboard:
         Design and implement a central dashboard providing an overview of system status, recent activity, and quick access to key features.
-        Include the basic task submission GUI developed earlier, but enhance it within the new framework.
+        Included the basic task submission GUI, enhanced it within React, and added displays for system status and recent activity.
 
     [ ] Interactive Analytics Dashboard:
         Build a dynamic interface to visualize audit logs and analytics data.
