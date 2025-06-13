@@ -1,0 +1,89 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea {
+    width: calc(100% - 22px); /* Account for padding and border */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Important for width calculation */
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    background-color: #5cb85c;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+pre {
+    background-color: #eee;
+    padding: 15px;
+    border-radius: 4px;
+    white-space: pre-wrap; /* Allows wrapping long lines */
+    word-wrap: break-word; /* Breaks long words */
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd; /* Added a default border */
+}
+
+pre.processing {
+    color: #666;
+    border-left: 5px solid #f0ad4e; /* Orange for processing */
+}
+
+pre.success {
+    color: #3c763d; /* Dark green for success text */
+    background-color: #dff0d8; /* Light green background */
+    border-left: 5px solid #5cb85c; /* Green border */
+}
+
+pre.error {
+    color: #a94442; /* Dark red for error text */
+    background-color: #f2dede; /* Light red background */
+    border-left: 5px solid #d9534f; /* Red border */
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

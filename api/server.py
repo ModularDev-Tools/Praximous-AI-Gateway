@@ -4,6 +4,9 @@ import uuid
 # --- MODIFIED: Import Query for endpoint parameters ---
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
+# --- NEW IMPORTS FOR GUI ---
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from typing import Dict, Any, Optional, List
 
 from core.logger import log
@@ -11,6 +14,7 @@ from core.skill_manager import skill_manager
 from core.model_router import model_router, NoAvailableProviderError
 # --- MODIFIED: Import the new count function ---
 from core.audit_logger import log_interaction, get_all_interactions, count_interactions
+from pathlib import Path # --- NEW IMPORT FOR GUI ---
 
 # ... (ProcessRequest and ProcessResponse models are unchanged) ...
 class ArbitraryKwargsBaseModel(BaseModel):
@@ -52,6 +56,24 @@ app = FastAPI(
     description="Secure, On-Premise AI Gateway"
 )
 
+# --- NEW: Setup for serving the basic GUI ---
+# Determine the project root directory relative to this file (api/server.py)
+# server.py -> api -> project_root
+PROJECT_ROOT_DIR = Path(__file__).resolve().parent.parent
+STATIC_GUI_DIR = PROJECT_ROOT_DIR / "static_gui"
+
+# Mount the directory containing CSS and JS files for the GUI
+# These will be accessible under "/static-gui-assets" path
+app.mount("/static-gui-assets", StaticFiles(directory=STATIC_GUI_DIR), name="static_gui_assets")
+
+# Endpoint to serve the main HTML page for the GUI
+@app.get("/gui", response_class=HTMLResponse, include_in_schema=False)
+async def serve_gui_index():
+    index_html_path = STATIC_GUI_DIR / "index.html"
+    if not index_html_path.is_file():
+        return HTMLResponse(content="GUI main page not found.", status_code=404)
+    return HTMLResponse(content=index_html_path.read_text())
+# --- END NEW GUI SETUP ---
 # ... (process_task endpoint is unchanged from the last step) ...
 @app.post("/api/v1/process", response_model=ProcessResponse)
 async def process_task(request: ProcessRequest):
@@ -93,13 +115,19 @@ async def process_task(request: ProcessRequest):
             return ProcessResponse(status=status, result=response_data, message=skill_response.get("message"), details=skill_response.get("details"), request_id=request_id)
         else:
             log.warning(f"API: [ReqID: {request_id}] Skill='{skill_instance.name}' execution reported failure: {skill_response.get('error')}")
+            status = "error" # Ensure status is marked as error for logging
             error_detail = skill_response.get("error", "Skill execution failed.")
             if skill_response.get("details"): error_detail += f" (Details: {skill_response.get('details')})"
-            raise HTTPException(status_code=400, detail=error_detail)
+            # Return a ProcessResponse with error status instead of raising HTTPException for skill-specific failures
+            return ProcessResponse(status=status, message=error_detail, request_id=request_id)
     except HTTPException:
+        status = "error" # Explicitly mark status for logging on known HTTP exceptions
         raise
-    except Exception:
-        raise
+    except Exception as e: # Catch any other unexpected errors
+        log.error(f"API: [ReqID: {request_id}] Unhandled exception in process_task: {e}", exc_info=True)
+        status = "error" # Explicitly mark status for logging
+        raise HTTPException(status_code=500, detail="An unexpected internal server error occurred.")
+
     finally:
         latency_ms = int((time.perf_counter() - start_time) * 1000)
         log_interaction(request_id=request_id, task_type=request.task_type, status=status, latency_ms=latency_ms, provider=provider, prompt=request.prompt, response_data=response_data)

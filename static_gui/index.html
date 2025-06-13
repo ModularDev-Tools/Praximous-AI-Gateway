@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Praximous Basic GUI</title>
+    <link rel="stylesheet" href="/static-gui-assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Praximous Task Processor</h1>
+        
+        <div class="form-group">
+            <label for="taskType">Task Type:</label>
+            <input type="text" id="taskType" value="default_llm_tasks" placeholder="e.g., default_llm_tasks, echo">
+        </div>
+
+        <div class="form-group">
+            <label for="prompt">Prompt:</label>
+            <textarea id="prompt" rows="5" placeholder="Enter your prompt here..."></textarea>
+        </div>
+
+        <button id="submitTask">Submit Task</button>
+
+        <h2>Response:</h2>
+        <pre id="responseArea">Awaiting submission...</pre>
+    </div>
+
+    <script src="/static-gui-assets/script.js"></script>
+</body>
+</html>
