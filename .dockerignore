@@ -1,0 +1,13 @@
+# .dockerignore
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.git
+.gitignore
+*.md # If you don't need READMEs or ROADMAPs in the image

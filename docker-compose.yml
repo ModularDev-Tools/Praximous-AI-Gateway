@@ -1,0 +1,19 @@
+# docker-compose.yml
+
+services:
+  praximous:
+    build: .
+    container_name: praximous
+    ports:
+      - "8000:8000"
+    # The .env file will be used for API keys in a later phase
+    env_file:
+      - .env
+    # Volumes ensure that config and logs persist outside the container
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - UVICORN_RELOAD=false # Disable Uvicorn reload when running in Docker
+    # We remove the 'command' line to use the CMD from the Dockerfile,
+    # which correctly runs `python main.py`
