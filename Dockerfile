@@ -33,4 +33,9 @@ EXPOSE 8000
 # The command to run when the container starts
 # This will first check for the identity file and then start the server
 # Note: We are not using --reload in production
+# (UVICORN_RELOAD env var controls this, see above)
 CMD ["python", "main.py"]
+
+# Healthcheck to ensure the application is running
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl --fail http://localhost:8000/ || exit 1

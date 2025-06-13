@@ -1,8 +1,8 @@
 # requirements.txt
 
-fastapi
-uvicorn[standard]
-PyYAML
-pytest
-httpx
-pytest-mock
+fastapi==0.104.1
+uvicorn[standard]==0.23.2
+PyYAML==6.0.1
+pytest==7.4.2
+httpx==0.25.0
+pytest-mock==3.11.1
