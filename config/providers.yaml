@@ -1,7 +1,0 @@
-providers:
-  gemini:
-    enabled: true
-    api_key: ${GEMINI_API_KEY}
-  ollama:
-    enabled: true
-    url: ${OLLAMA_API_URL}

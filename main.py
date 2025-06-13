@@ -103,7 +103,7 @@ def main():
         for key in missing_keys:
             log.warning(f"  - {key}")
         log.warning("Praximous will attempt to start, but functionality requiring these keys may be limited or fall back to local providers if configured.")
-        log.warning(f"Please ensure these are set in '{os.path.abspath(CONFIG_DIR)}/../.env' or run 'python main.py --init' to configure them.")
+        log.warning(f"Please ensure these environment variables are set. They can be configured in your .env file or directly in your container's environment.")
 
     try:
         import uvicorn
