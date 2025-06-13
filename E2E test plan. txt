@@ -1,11 +1,3 @@
-Let's rock! Here is the complete End-to-End (E2E) test plan for the Praximous MVP.
-
-The goal of this test is to simulate a new user setting up and using the application from scratch, following our `README.md` documentation. This will validate that all our components—initialization, Docker, the API, skills, LLM routing, and auditing—work together correctly.
-
-Please follow these steps carefully in your terminal from the project root (`praximous_mvp_scaffold`).
-
----
-
 ### **E2E Test Plan: Praximous MVP v1.0**
 
 #### **Step 1: Clean Slate (Simulate Fresh Install)**
@@ -109,9 +101,3 @@ a. **Stop the service:**
 docker compose down
 ```
 **Expected Outcome:** The `praximous` container should stop cleanly.
-
----
-
-If all these steps succeed without error, our Praximous MVP is fully tested and validated!
-
-Please proceed with the test plan and let me know the results.
