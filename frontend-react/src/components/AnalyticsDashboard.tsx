@@ -208,22 +208,42 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTy
             <table className="analytics-table">
               <thead>
                 <tr>
-                  <th onClick={() => requestSort('timestamp')} className="sortable-header">
+                  <th 
+                    onClick={() => requestSort('timestamp')} 
+                    className="sortable-header"
+                    aria-sort={sortConfig.key === 'timestamp' ? sortConfig.direction : 'none'}
+                  >
                     Timestamp {sortConfig.key === 'timestamp' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
                   </th>
-                  <th onClick={() => requestSort('task_type')} className="sortable-header">
+                  <th 
+                    onClick={() => requestSort('task_type')} 
+                    className="sortable-header"
+                    aria-sort={sortConfig.key === 'task_type' ? sortConfig.direction : 'none'}
+                  >
                     Task Type {sortConfig.key === 'task_type' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
                   </th>
-                  <th onClick={() => requestSort('provider')} className="sortable-header">
+                  <th 
+                    onClick={() => requestSort('provider')} 
+                    className="sortable-header"
+                    aria-sort={sortConfig.key === 'provider' ? sortConfig.direction : 'none'}
+                  >
                     Provider {sortConfig.key === 'provider' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
                   </th>
-                  <th onClick={() => requestSort('status')} className="sortable-header">
+                  <th 
+                    onClick={() => requestSort('status')} 
+                    className="sortable-header"
+                    aria-sort={sortConfig.key === 'status' ? sortConfig.direction : 'none'}
+                  >
                     Status {sortConfig.key === 'status' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
                   </th>
-                  <th onClick={() => requestSort('latency_ms')} className="sortable-header">
+                  <th 
+                    onClick={() => requestSort('latency_ms')} 
+                    className="sortable-header"
+                    aria-sort={sortConfig.key === 'latency_ms' ? sortConfig.direction : 'none'}
+                  >
                     Latency (ms) {sortConfig.key === 'latency_ms' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
                   </th>
-                  <th>Prompt (snippet)</th> {/* Not making prompt sortable for now */}
+                  <th>Prompt (snippet)</th>
                 </tr>
               </thead>
               <tbody>

@@ -4,6 +4,8 @@ import './App.css'
 // import AnalyticsDashboard from './components/AnalyticsDashboard'; // Changed to lazy import
 
 const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+const SkillLibrary = lazy(() => import('./components/SkillLibrary')); // Lazy load SkillLibrary too
+const ConfigViewer = lazy(() => import('./components/ConfigViewer')); // Lazy load ConfigViewer
 
 interface TaskFormData {
   task_type: string;
@@ -358,6 +360,18 @@ function App() {
           <h2>Interactive Analytics Dashboard</h2>
           <Suspense fallback={<div>Loading Analytics Dashboard...</div>}>
             <AnalyticsDashboard availableTaskTypes={analyticsTaskTypeOptions} />
+          </Suspense>
+        </section>
+        <section className="dashboard-section skill-library-section">
+          <h2>Skill Library</h2>
+          <Suspense fallback={<div>Loading Skill Library...</div>}>
+            <SkillLibrary />
+          </Suspense>
+        </section>
+        <section className="dashboard-section config-viewer-section">
+          <h2>System Configuration Viewer</h2>
+          <Suspense fallback={<div>Loading Configuration Viewer...</div>}>
+            <ConfigViewer />
           </Suspense>
         </section>
       </main>

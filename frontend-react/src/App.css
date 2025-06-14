@@ -329,3 +329,64 @@
 
 .log-detail-item strong { margin-right: 5px; }
 .log-detail-full pre { background-color: #f9f9f9; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; border: 1px solid #eee; }
+
+/* Skill Library Styles */
+.skill-library {
+  margin-top: 20px;
+}
+
+.skill-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.skill-card h3 {
+  margin-top: 0;
+  color: #34495e;
+  cursor: pointer; /* Indicates it's clickable */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-details {
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #3498db;
+}
+
+.skill-details h4 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.operation-details {
+  margin-bottom: 15px;
+  padding-left: 15px;
+}
+.operation-details h5 { font-size: 1.05em; color: #2c3e50; margin-bottom: 3px;}
+.operation-details ul { padding-left: 20px; margin-top: 5px; }
+.example-payload pre { background-color: #f0f0f0; padding: 8px; border-radius: 4px; font-size: 0.85em; }
+
+/* Config Viewer Styles */
+.config-viewer {
+  margin-top: 20px;
+}
+.config-viewer h4 {
+  margin-bottom: 10px;
+}
+.config-content {
+  background-color: #f8f9fa; /* Light grey background */
+  border: 1px solid #dee2e6; /* Light border */
+  padding: 15px;
+  border-radius: 4px;
+  white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+  word-break: break-all; /* Break long words/strings */
+  max-height: 500px; /* Limit height and make scrollable */
+  overflow: auto;
+  font-family: 'Courier New', Courier, monospace; /* Monospaced font for code/config */
+  font-size: 0.9em;
+}

@@ -286,6 +286,20 @@ async def get_skill_capabilities(skill_name: str):
         log.error(f"Error getting capabilities for skill {skill_name}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve skill capabilities.")
 
+# --- NEW: Configuration Viewing Endpoints ---
+@app.get("/api/v1/config/providers", response_model=str, summary="Get the content of providers.yaml")
+async def get_providers_config_content():
+    try:
+        if not PROVIDERS_CONFIG_PATH.is_file():
+            raise HTTPException(status_code=404, detail="providers.yaml not found.")
+        with open(PROVIDERS_CONFIG_PATH, 'r') as f:
+            content = f.read()
+        return content
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Error reading providers.yaml: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not read provider configuration file.")
 # --- END API ENDPOINTS ---
 
 # --- UPDATED: Setup for serving the React GUI ---
