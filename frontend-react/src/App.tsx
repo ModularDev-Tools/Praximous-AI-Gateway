@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import './App.css'
+import AnalyticsDashboard from './components/AnalyticsDashboard'; // Import the new component
 
 interface TaskFormData {
   task_type: string;
@@ -74,7 +75,7 @@ function TaskForm({ onSubmit, isSubmitting }: TaskFormProps) {
 }
 
 function App() {
-  const [response, setResponse] = useState<any | null>(null); // Consider a more specific type for responseData
+  const [response, setResponse] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recentActivity, setRecentActivity] = useState<InteractionRecord[]>([]);
@@ -99,7 +100,13 @@ function App() {
       if (apiResponse.ok) {
         setResponse(responseData);
       } else {
-        setError(responseData.detail || JSON.stringify(responseData, null, 2));
+        let errorDetailMessage = `Error ${apiResponse.status}: `;
+        try {
+            errorDetailMessage += responseData.detail || JSON.stringify(responseData);
+        } catch (e) {
+            errorDetailMessage += apiResponse.statusText || "Unknown error processing task";
+        }
+        setError(errorDetailMessage);
       }
     } catch (err: any) { // Catching 'any' for simplicity, can be more specific
       console.error('Error submitting task:', err);
@@ -107,7 +114,7 @@ function App() {
     } finally {
       setIsLoading(false);
       // Optionally, refresh recent activity after a task submission
-      fetchRecentActivity(); 
+      fetchRecentActivity();
     }
   };
 
@@ -118,8 +125,15 @@ function App() {
         const data = await apiResponse.json();
         setRecentActivity(data.data || []);
       } else {
-        console.error('Failed to fetch recent activity:', apiResponse.statusText);
-        setRecentActivity([]); // Clear or handle error appropriately
+        let errorDetail = `Failed to fetch recent activity: ${apiResponse.status} ${apiResponse.statusText}`;
+        try {
+            const errorData = await apiResponse.json(); // Try to parse error as JSON
+            errorDetail = errorData.detail || JSON.stringify(errorData);
+        } catch (jsonError) {
+            errorDetail = await apiResponse.text() || errorDetail; // Fallback to text
+        }
+        console.error(errorDetail);
+        setRecentActivity([]);
       }
     } catch (err) {
       console.error('Error fetching recent activity:', err);
@@ -134,8 +148,15 @@ function App() {
         const data = await apiResponse.json();
         setSystemStatus(data.providers_status || []);
       } else {
-        console.error('Failed to fetch system status:', apiResponse.statusText);
-        setSystemStatus([{ name: "System Status", status: "Error", details: "Could not fetch status." }]);
+        let errorDetail = `Failed to fetch system status: ${apiResponse.status} ${apiResponse.statusText}`;
+        try {
+            const errorData = await apiResponse.json();
+            errorDetail = errorData.detail || JSON.stringify(errorData);
+        } catch (jsonError) {
+            errorDetail = await apiResponse.text() || errorDetail;
+        }
+        console.error(errorDetail);
+        setSystemStatus([{ name: "System Status", status: "Error", details: `Could not fetch status. Server said: ${errorDetail.substring(0,100)}...` }]);
       }
     } catch (err) {
       console.error('Error fetching system status:', err);
@@ -158,8 +179,16 @@ function App() {
           <h2>Submit New Task</h2>
           <TaskForm onSubmit={handleTaskSubmit} isSubmitting={isLoading} />
           {isLoading && <p className="loading-message">Processing...</p>}
-          {response && <div className="response-area success"><pre>{JSON.stringify(response, null, 2)}</pre></div>}
-          {error && <div className="response-area error"><pre>{error}</pre></div>}
+          {response && (
+            <div className="response-area success">
+              <pre>{JSON.stringify(response, null, 2)}</pre>
+            </div>
+          )}
+          {error && (
+            <div className="response-area error">
+              <pre>{error}</pre>
+            </div>
+          )}
         </section>
         <section className="dashboard-section system-status">
           <h2>System Status</h2>
@@ -193,6 +222,10 @@ function App() {
           ) : (
             <p>No recent activity to display.</p>
           )}
+        </section>
+        <section className="dashboard-section analytics-section">
+          <h2>Interactive Analytics Dashboard</h2>
+          <AnalyticsDashboard />
         </section>
       </main>
     </div>

@@ -125,7 +125,7 @@ Tasks:
 
     [ ] Interactive Analytics Dashboard:
         Build a dynamic interface to visualize audit logs and analytics data.
-        Include features like date range filtering, charting of usage patterns (e.g., requests per provider, tasks over time), and detailed log inspection.
+        [✓] Include features like date range filtering. Charting of usage patterns (e.g., requests per provider, tasks over time), and detailed log inspection are next.
         (Supersedes "Analytics Dashboard" from Post-MVP)
 
     [ ] Skill Library Management UI:

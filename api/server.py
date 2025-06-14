@@ -12,8 +12,13 @@ from typing import Dict, Any, Optional, List
 from core.logger import log
 from core.skill_manager import skill_manager
 from core.model_router import model_router, NoAvailableProviderError
-# --- MODIFIED: Import the new count function and provider_manager ---
-from core.audit_logger import log_interaction, get_all_interactions, count_interactions
+from core.audit_logger import (
+    log_interaction, 
+    get_all_interactions, 
+    count_interactions,
+    get_tasks_over_time_data,
+    get_requests_per_provider_data,
+    get_average_latency_per_provider_data)
 from core.provider_manager import provider_manager, PROVIDERS_CONFIG_PATH # Import provider_manager
 from pathlib import Path
 import yaml # For reading providers.yaml
@@ -59,6 +64,19 @@ class ProviderStatus(BaseModel):
 
 class SystemStatusResponse(BaseModel):
     providers_status: List[ProviderStatus]
+
+# --- NEW: Chart Data Models ---
+class TasksOverTimeDataPoint(BaseModel):
+    date_group: str # e.g., "YYYY-MM-DD" or "YYYY-MM"
+    count: int
+
+class RequestsPerProviderDataPoint(BaseModel):
+    provider_name: str
+    count: int
+
+class AverageLatencyDataPoint(BaseModel):
+    provider_name: str
+    average_latency: float # Can be float due to AVG
 # --- END NEW SYSTEM STATUS MODELS ---
 
 # --- END MODIFIED ---
@@ -168,14 +186,22 @@ async def process_task(request: ProcessRequest):
 async def get_analytics_data(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
-    task_type: Optional[str] = Query(None, description="Filter records by a specific task_type")
+    task_type: Optional[str] = Query(None, description="Filter records by a specific task_type"),
+    start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
+    end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
 ):
     """
     Retrieves a paginated and optionally filtered list of interactions from the audit database.
     """
     try:
-        records = get_all_interactions(limit=limit, offset=offset, task_type=task_type)
-        total_matches = count_interactions(task_type=task_type)
+        records = get_all_interactions(
+            limit=limit, offset=offset, task_type=task_type, 
+            start_date=start_date, end_date=end_date
+        )
+        total_matches = count_interactions(
+            task_type=task_type, 
+            start_date=start_date, end_date=end_date
+        )
         return AnalyticsResponse(
             total_matches=total_matches,
             limit=limit,
@@ -224,6 +250,49 @@ async def get_system_status():
         raise HTTPException(status_code=500, detail="Could not retrieve system status.")
     return SystemStatusResponse(providers_status=provider_statuses)
 # --- END NEW SYSTEM STATUS ENDPOINT ---
+
+# --- NEW CHART DATA ENDPOINTS ---
+@app.get("/api/v1/analytics/charts/tasks-over-time", response_model=List[TasksOverTimeDataPoint], summary="Get data for tasks over time chart")
+async def get_chart_tasks_over_time(
+    start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
+    end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
+    granularity: str = Query("day", description="Granularity of time grouping: 'day', 'month', 'year'")
+):
+    try:
+        if granularity not in ["day", "month", "year"]:
+            raise HTTPException(status_code=400, detail="Invalid granularity. Must be 'day', 'month', or 'year'.")
+        data = get_tasks_over_time_data(start_date=start_date, end_date=end_date, granularity=granularity)
+        return data
+    except Exception as e:
+        log.error(f"Failed to retrieve tasks over time chart data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve tasks over time chart data.")
+
+@app.get("/api/v1/analytics/charts/requests-per-provider", response_model=List[RequestsPerProviderDataPoint], summary="Get data for requests per provider chart")
+async def get_chart_requests_per_provider(
+    start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
+    end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
+):
+    try:
+        data = get_requests_per_provider_data(start_date=start_date, end_date=end_date)
+        return data
+    except Exception as e:
+        log.error(f"Failed to retrieve requests per provider chart data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve requests per provider chart data.")
+
+@app.get("/api/v1/analytics/charts/average-latency-per-provider", response_model=List[AverageLatencyDataPoint], summary="Get data for average latency per provider chart")
+async def get_chart_average_latency_per_provider(
+    start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
+    end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
+):
+    try:
+        data = get_average_latency_per_provider_data(start_date=start_date, end_date=end_date)
+        return data
+    except Exception as e:
+        log.error(f"Failed to retrieve average latency per provider chart data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve average latency per provider chart data.")
+
+# --- END NEW CHART DATA ENDPOINTS ---
+
 
 # ... (list_skills_capabilities and get_skill_capabilities endpoints are unchanged) ...
 @app.get("/api/v1/skills", summary="List all available skills and their capabilities")
