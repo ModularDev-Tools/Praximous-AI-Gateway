@@ -38,8 +38,8 @@ def generate_fake_data(num_records=100):
         print(f"Error ensuring table exists: {e}")
         return
 
-    task_types = ["default_llm_tasks", "echo", "text_manipulation", "simple_math", "internal_summary", "datetime_tool", "weather_tool", "web_scraper", "csv_parser", "sentiment_analyzer"]
-    providers = ["gemini_pro_model", "ollama_default", "skill:echo", "skill:text_manipulation", "skill:simple_math", "skill:internal_summary", "skill:datetime_tool", "skill:weather_tool", "skill:web_scraper", "skill:csv_parser", "skill:sentiment_analyzer", None]
+    task_types = ["default_llm_tasks", "echo", "text_manipulation", "simple_math", "internal_summary", "datetime_tool", "weather_tool", "web_scraper", "csv_parser", "sentiment_analyzer", "web_search_tool", "email_sender", "pii_redactor"]
+    providers = ["gemini_pro_model", "ollama_default", "skill:echo", "skill:text_manipulation", "skill:simple_math", "skill:internal_summary", "skill:datetime_tool", "skill:weather_tool", "skill:web_scraper", "skill:csv_parser", "skill:sentiment_analyzer", "skill:web_search_tool", "skill:email_sender", "skill:pii_redactor", None]
     statuses = ["success", "error"]
     sample_prompts = [
         "What is the capital of France?",
@@ -53,7 +53,10 @@ def generate_fake_data(num_records=100):
         "Extract text from example.com",
         "What's the date today?",
         "name,value\nitem1,10\nitem2,20", # Sample CSV data
-        "I love using Praximous, it's fantastic!" # Sample text for sentiment
+        "I love using Praximous, it's fantastic!", # Sample text for sentiment
+        "Current news about renewable energy", # Sample search query
+        "Send a status update email", # Sample prompt for email
+        "My phone number is 555-1234 and I live at 123 Main St." # Sample prompt for PII redaction
     ]
 
     records_to_insert = []

@@ -145,15 +145,15 @@ Goal: Implement the business logic, licensing system, and online presence requir
 
 Tasks:
 
-    [ ] Expand Core Skill Library:
+    [✓] Expand Core Skill Library:
         Develop and integrate a broader range of sophisticated Smart Skills (e.g., data analysis, advanced text processing, integration with common business tools, RAG components).
         Provide clear documentation and templates for creating new custom skills.
 
-    [ ] Tiered Licensing Logic:
+    [>] Tiered Licensing Logic:
 
-        Implement feature flags in the application code based on the license key's tier field (Pro vs. Enterprise).
+        [✓] Implement feature flags in the application code based on the license key's tier field (Pro vs. Enterprise). (Initial mechanism in core/license_manager.py)
 
-        Lock down premium features (RAG Interface, RBAC, PII Redaction) for non-Enterprise keys.
+        [>] Lock down premium features (RAG Interface, RBAC, PII Redaction) for non-Enterprise keys. (PIIRedactionSkill created and locked down; RAG Interface & RBAC to be locked down when implemented)
 
     [ ] Cryptographic License Key Generation:
 
