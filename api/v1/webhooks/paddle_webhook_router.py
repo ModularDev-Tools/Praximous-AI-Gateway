@@ -8,6 +8,8 @@ import hashlib
 from core.logger import log
 from core.license_generator import load_private_key, create_signed_license_payload, DEFAULT_APP_PRIVATE_KEY_PATH
 from core.license_manager import LicenseTier # To validate tier from webhook
+# For using BasicEmailSkill
+from core.skill_manager import SkillManager
 
 # --- Webhook Security Configuration ---
 # This secret should be known only to Praximous and the Merchant of Record (e.g., Paddle)
@@ -75,7 +77,7 @@ async def verify_webhook_signature(
 @router.post("/purchase_completed", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(verify_webhook_signature)])
 async def handle_purchase_completed(
     payload: Dict[str, Any], # The raw JSON payload from Paddle
-    request: Request # No longer strictly needed here if verification is a dependency, but kept for consistency
+    request: Request # To access app.state for SkillManager and SystemContext
 ):
     """
     Handles the 'purchase_completed' (or similar) webhook from Paddle.
@@ -124,12 +126,42 @@ async def handle_purchase_completed(
         )
         log.info(f"Generated license key for {customer_name} (Tier: {tier}): {license_key_string}")
 
-        # --- TODO: License Delivery ---
-        # 1. Store the license key in your database, associated with the customer/transaction.
-        # 2. Email the license key to customer_email.
-        #    (Could use BasicEmailSkill or a direct email function here)
-        log.info(f"SIMULATING LICENSE DELIVERY: License for {customer_email} would be sent here.")
+        # --- License Delivery via BasicEmailSkill ---
+        skill_manager: Optional[SkillManager] = getattr(request.app.state, 'skill_manager', None)
+        system_context = getattr(request.app.state, 'system_context', None)
 
+        if skill_manager and system_context and customer_email:
+            email_skill = skill_manager.get_skill("email_sender")
+            if email_skill:
+                email_subject = f"Your Praximous License Key - {tier.capitalize()} Tier"
+                email_body = (
+                    f"Dear {customer_name},\n\n"
+                    f"Thank you for your Praximous purchase!\n\n"
+                    f"Your License Tier: {tier.capitalize()}\n"
+                    f"Validity: {validity_days} days\n\n"
+                    f"Please use the following license key to activate Praximous:\n\n"
+                    f"{license_key_string}\n\n"
+                    f"To apply this license, set the PRAXIMOUS_LICENSE_KEY environment variable in your .env file or system environment.\n\n"
+                    f"If you have any questions, please contact support.\n\n"
+                    f"Thanks,\nThe Praximous Team"
+                )
+                email_result = await email_skill.execute(
+                    prompt=email_body, # Using prompt for body as per BasicEmailSkill
+                    to=customer_email,
+                    subject=email_subject,
+                    # system_context=system_context # Pass context if skill expects it
+                )
+                if email_result.get("success"):
+                    log.info(f"License key successfully emailed to {customer_email}.")
+                else:
+                    log.error(f"Failed to email license key to {customer_email}. Skill response: {email_result.get('error_details', email_result.get('error', 'Unknown email error'))}")
+            else:
+                log.error("Email sender skill not found. Cannot email license key.")
+        else:
+            log.error("SkillManager, SystemContext, or customer_email not available. Cannot email license key.")
+            if not customer_email:
+                log.error("Customer email not found in webhook payload. Cannot send license.")
+        
         return {"status": "success", "message": "License generated and (simulated) delivery initiated."}
 
     except FileNotFoundError:

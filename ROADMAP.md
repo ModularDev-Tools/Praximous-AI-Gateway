@@ -165,11 +165,11 @@ Tasks:
 
         [✓] Implement the "Degraded Functionality" mode for expired licenses and the "Hard Stop" for invalid keys. (Degraded to Community tier on expiry/invalid key implemented in license_manager.py)
 
-    [>] Website: Automated Purchase & Provisioning: (MoR integrated, backend webhook in progress)
+    [>] Website: Automated Purchase & Provisioning: (MoR integrated, backend webhook signature verification implemented)
 
         [✓] Integrate a Merchant of Record (e.g., Paddle) for checkout and global tax handling. (External setup and integration task)
 
-        [>] Create a secure backend endpoint (webhook receiver) to automate license key generation and delivery upon successful purchase. (Webhook router `api/v1/webhooks/paddle_webhook_router.py` created. TODOs: Implement MoR signature verification, actual license delivery.)
+        [✓] Create a secure backend endpoint (webhook receiver) to automate license key generation and delivery upon successful purchase. (Webhook router `api/v1/webhooks/paddle_webhook_router.py` updated with MoR signature verification and license delivery via BasicEmailSkill. TODO: Consider database storage for licenses.)
 
     [ ] Website: The Dojo (Documentation Portal):
 
