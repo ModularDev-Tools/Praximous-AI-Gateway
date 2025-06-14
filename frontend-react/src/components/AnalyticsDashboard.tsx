@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
+import type { FilterTaskType } from '../App'; // Import the interface
 import TasksOverTimeChart from './TasksOverTimeChart';
 import RequestsPerProviderChart from './RequestsPerProviderChart';
 import AverageLatencyChart from './AverageLatencyChart';
@@ -24,7 +25,16 @@ interface AnalyticsData {
   data: InteractionRecord[];
 }
 
-const AnalyticsDashboard: React.FC = () => {
+interface AnalyticsDashboardProps {
+  availableTaskTypes: FilterTaskType[];
+}
+
+interface SortConfig {
+  key: keyof InteractionRecord | null;
+  direction: 'ascending' | 'descending';
+}
+
+const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTypes }) => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +46,8 @@ const AnalyticsDashboard: React.FC = () => {
   // Placeholder for date filters - backend support would be needed
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [selectedLog, setSelectedLog] = useState<InteractionRecord | null>(null);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'timestamp', direction: 'descending' });
 
   const fetchAnalytics = async (currentOffset = offset) => {
     setIsLoading(true);
@@ -105,19 +117,65 @@ const AnalyticsDashboard: React.FC = () => {
     }
   };
 
+  const handleRowClick = (log: InteractionRecord) => {
+    setSelectedLog(log);
+  };
+
+  const requestSort = (key: keyof InteractionRecord) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedData = React.useMemo(() => {
+    if (!analyticsData?.data) return [];
+    let sortableItems = [...analyticsData.data];
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        const valA = a[sortConfig.key!];
+        const valB = b[sortConfig.key!];
+
+        if (valA === null || valA === undefined) return sortConfig.direction === 'ascending' ? 1 : -1;
+        if (valB === null || valB === undefined) return sortConfig.direction === 'ascending' ? -1 : 1;
+
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
+        }
+        // Default to string comparison for other types (like timestamp, task_type, provider, status)
+        const stringA = String(valA).toLowerCase();
+        const stringB = String(valB).toLowerCase();
+        if (stringA < stringB) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (stringA > stringB) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [analyticsData, sortConfig]);
+
   return (
     <div className="analytics-dashboard">
       <h3>Filters</h3>
       <form onSubmit={handleFilterSubmit} className="analytics-filters">
         <div className="filter-group">
           <label htmlFor="taskTypeFilter">Task Type:</label>
-          <input
-            type="text"
+          <select
             id="taskTypeFilter"
             value={taskTypeFilter}
             onChange={(e) => setTaskTypeFilter(e.target.value)}
-            placeholder="e.g., echo, default_llm_tasks"
-          />
+          >
+            <option value="">All Task Types</option>
+            {availableTaskTypes.map(task => (
+              <option key={task.value} value={task.value}>
+                {task.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="filter-group">
           <label htmlFor="limit">Limit:</label>
@@ -156,43 +214,87 @@ const AnalyticsDashboard: React.FC = () => {
         </div>
       </div>
 
-      {isLoading && <p>Loading analytics data...</p>}
+      {isLoading && !analyticsData && <p>Loading analytics data...</p>} 
       {error && <p className="error-message">Error: {error}</p>}
       
-      {analyticsData && (
+      {(!isLoading || analyticsData) && ( // Show table structure even if loading new page
         <>
-          <p>Showing {analyticsData.data.length} of {analyticsData.total_matches} records. Page {Math.floor(offset / limit) + 1}.</p>
-          <div className="pagination-controls">
-            <button onClick={handlePreviousPage} disabled={offset === 0 || isLoading}>Previous</button>
-            <button onClick={handleNextPage} disabled={!analyticsData || (offset + limit >= analyticsData.total_matches) || isLoading}>Next</button>
-          </div>
+          {analyticsData && (
+            <>
+              <p>Showing {analyticsData.data.length} of {analyticsData.total_matches} records. Page {Math.floor(offset / limit) + 1}.</p>
+              <div className="pagination-controls">
+                <button onClick={handlePreviousPage} disabled={offset === 0 || isLoading}>Previous</button>
+                <button onClick={handleNextPage} disabled={!analyticsData || (offset + limit >= analyticsData.total_matches) || isLoading}>Next</button>
+              </div>
+            </>
+          )}
           <div className="analytics-table-container">
             <table className="analytics-table">
               <thead>
                 <tr>
-                  <th>Timestamp</th>
-                  <th>Task Type</th>
-                  <th>Provider</th>
-                  <th>Status</th>
-                  <th>Latency (ms)</th>
-                  <th>Prompt (snippet)</th>
+                  <th onClick={() => requestSort('timestamp')} className="sortable-header">
+                    Timestamp {sortConfig.key === 'timestamp' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
+                  </th>
+                  <th onClick={() => requestSort('task_type')} className="sortable-header">
+                    Task Type {sortConfig.key === 'task_type' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
+                  </th>
+                  <th onClick={() => requestSort('provider')} className="sortable-header">
+                    Provider {sortConfig.key === 'provider' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
+                  </th>
+                  <th onClick={() => requestSort('status')} className="sortable-header">
+                    Status {sortConfig.key === 'status' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
+                  </th>
+                  <th onClick={() => requestSort('latency_ms')} className="sortable-header">
+                    Latency (ms) {sortConfig.key === 'latency_ms' ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
+                  </th>
+                  <th>Prompt (snippet)</th> {/* Not making prompt sortable for now */}
                 </tr>
               </thead>
               <tbody>
-                {analyticsData.data.map((record) => (
-                  <tr key={record.id}>
+                {isLoading && sortedData.length === 0 && (
+                  <tr><td colSpan={6} style={{ textAlign: 'center' }}>Loading data...</td></tr>
+                )}
+                {!isLoading && sortedData.length === 0 && analyticsData && (
+                  <tr><td colSpan={6} style={{ textAlign: 'center' }}>No records found for the selected filters.</td></tr>
+                )}
+                {sortedData.map((record) => (
+                  <tr key={record.id} onClick={() => handleRowClick(record)} className="log-row-clickable">
                     <td>{new Date(record.timestamp).toLocaleString()}</td>
                     <td>{record.task_type}</td>
                     <td>{record.provider || 'N/A'}</td>
                     <td className={`status-${record.status.toLowerCase()}`}>{record.status}</td>
                     <td>{record.latency_ms ?? 'N/A'}</td>
-                    <td>{record.prompt ? record.prompt.substring(0, 50) + (record.prompt.length > 50 ? '...' : '') : 'N/A'}</td>
+                    <td title={record.prompt || ''}>{record.prompt ? record.prompt.substring(0, 50) + (record.prompt.length > 50 ? '...' : '') : 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </>
+      )}
+
+      {selectedLog && (
+        <div className="modal-overlay" onClick={() => setSelectedLog(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={() => setSelectedLog(null)}>&times;</button>
+            <h4>Log Details (ID: {selectedLog.request_id})</h4>
+            <div className="log-detail-grid">
+              <div className="log-detail-item"><strong>Timestamp:</strong> {new Date(selectedLog.timestamp).toLocaleString()}</div>
+              <div className="log-detail-item"><strong>Task Type:</strong> {selectedLog.task_type}</div>
+              <div className="log-detail-item"><strong>Provider:</strong> {selectedLog.provider || 'N/A'}</div>
+              <div className="log-detail-item"><strong>Status:</strong> {selectedLog.status}</div>
+              <div className="log-detail-item"><strong>Latency:</strong> {selectedLog.latency_ms ?? 'N/A'} ms</div>
+            </div>
+            <div className="log-detail-full">
+              <strong>Prompt:</strong>
+              <pre>{selectedLog.prompt || 'N/A'}</pre>
+            </div>
+            <div className="log-detail-full">
+              <strong>Response Data:</strong>
+              <pre>{selectedLog.response_data || 'N/A'}</pre>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

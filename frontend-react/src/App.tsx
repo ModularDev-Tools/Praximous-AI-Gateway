@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react'; // Added lazy and Suspense
 import type { FormEvent } from 'react';
 import './App.css'
-import AnalyticsDashboard from './components/AnalyticsDashboard'; // Import the new component
+// import AnalyticsDashboard from './components/AnalyticsDashboard'; // Changed to lazy import
+
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
 
 interface TaskFormData {
   task_type: string;
@@ -11,6 +13,10 @@ interface TaskFormData {
 interface TaskFormProps {
   onSubmit: (data: TaskFormData) => void;
   isSubmitting: boolean;
+  llmTaskTypes: FilterTaskType[]; // Now passed from App
+  availableSkills: Record<string, SkillCapability>; // Now passed from App
+  skillsLoading: boolean; // Now passed from App
+  skillsError: string | null; // Now passed from App
 }
 
 interface SkillCapability {
@@ -36,20 +42,22 @@ interface ProviderStatusRecord {
   details?: string;
 }
 
-function TaskForm({ onSubmit, isSubmitting }: TaskFormProps) {
+export interface FilterTaskType { // Exporting for use in AnalyticsDashboard
+  name: string;
+  value: string;
+}
+
+function TaskForm({
+  onSubmit,
+  isSubmitting,
+  llmTaskTypes, // Receive from App
+  availableSkills, // Receive from App
+  skillsLoading, // Receive from App
+  skillsError, // Receive from App
+}: TaskFormProps) {
   const defaultTaskType = 'default_llm_tasks';
   const [taskType, setTaskType] = useState<string>(defaultTaskType);
   const [prompt, setPrompt] = useState<string>('');
-  const [availableSkills, setAvailableSkills] = useState<Record<string, SkillCapability>>({});
-  const [skillsLoading, setSkillsLoading] = useState<boolean>(true);
-  const [skillsError, setSkillsError] = useState<string | null>(null);
-
-  // LLM task types (could eventually be fetched from backend if they become more dynamic)
-  const llmTaskTypes = [
-    { name: "Default LLM Tasks", value: "default_llm_tasks" },
-    { name: "Internal Summary (LLM)", value: "internal_summary" },
-    // Add other LLM task types from your ModelRouter here
-  ];
 
   // Sort skills by name for consistent dropdown order
   const sortedSkillNames = Object.keys(availableSkills).sort();
@@ -62,48 +70,6 @@ function TaskForm({ onSubmit, isSubmitting }: TaskFormProps) {
     }
     onSubmit({ task_type: taskType, prompt });
   };
-
-  useEffect(() => {
-    const fetchSkills = async () => {
-      setSkillsLoading(true);
-      setSkillsError(null);
-      try {
-        const apiResponse = await fetch('/api/v1/skills');
-        const responseText = await apiResponse.text();
-
-        if (apiResponse.ok) {
-          try {
-            const data: Record<string, SkillCapability> = JSON.parse(responseText);
-            setAvailableSkills(data);
-            if (Object.keys(data).length === 0) {
-              console.warn("Received an empty list of skills from the API.");
-            }
-          } catch (e) {
-            console.error("Failed to parse skills JSON:", responseText, e);
-            throw new Error("Received skills data is not valid JSON.");
-          }
-        } else {
-          let errorDetail = `Failed to load skills: ${apiResponse.status} ${apiResponse.statusText}`;
-          try {
-            // Attempt to parse error response as JSON
-            const errorData = JSON.parse(responseText);
-            errorDetail = errorData.detail || errorData.error || JSON.stringify(errorData); // Check for common error fields
-          } catch (jsonError) {
-            // If not JSON, use the response text or a generic message
-            errorDetail = responseText || errorDetail;
-          }
-          console.error("Failed to fetch skills:", errorDetail);
-          setSkillsError(errorDetail);
-          setAvailableSkills({}); // Clear skills on error
-        }
-      } catch (error) {
-        console.error("Error fetching skills:", error);
-        setSkillsError(`Error fetching skills: ${error instanceof Error ? error.message : String(error)}`);
-      }
-      setSkillsLoading(false);
-    };
-    fetchSkills();
-  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="task-form">
@@ -155,6 +121,11 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recentActivity, setRecentActivity] = useState<InteractionRecord[]>([]);
   const [systemStatus, setSystemStatus] = useState<ProviderStatusRecord[]>([]);
+  
+  // State lifted from TaskForm
+  const [availableSkills, setAvailableSkills] = useState<Record<string, SkillCapability>>({});
+  const [skillsLoading, setSkillsLoading] = useState<boolean>(true);
+  const [skillsError, setSkillsError] = useState<string | null>(null);
 
   const handleTaskSubmit = async (taskData: TaskFormData) => {
     setIsLoading(true);
@@ -261,10 +232,66 @@ function App() {
     }
   };
 
+  // LLM task types defined in App to be shared
+  const llmTaskTypes: FilterTaskType[] = [
+    { name: "Default LLM Tasks", value: "default_llm_tasks" },
+    { name: "Internal Summary (LLM)", value: "internal_summary" },
+    // Add other LLM task types from your ModelRouter here
+  ];
+
   useEffect(() => {
+    const fetchSkillsForApp = async () => {
+      setSkillsLoading(true);
+      setSkillsError(null);
+      try {
+        const apiResponse = await fetch('/api/v1/skills');
+        const responseText = await apiResponse.text();
+
+        if (apiResponse.ok) {
+          try {
+            const data: Record<string, SkillCapability> = JSON.parse(responseText);
+            console.log("App: Skills data received:", data); // <<< ADD THIS LOG
+            setAvailableSkills(data);
+            if (Object.keys(data).length === 0) {
+              console.warn("App: Received an empty list of skills from the API.");
+            }
+          } catch (e) {
+            console.error("App: Failed to parse skills JSON:", responseText, e); // <<< CHECK THIS ERROR
+            // throw new Error("App: Received skills data is not valid JSON."); // This throw might be too aggressive if you want to see other parts of the app load
+            setSkillsError("App: Received skills data is not valid JSON."); // Set error state instead
+          }
+        } else {
+          let errorDetail = `App: Failed to load skills: ${apiResponse.status} ${apiResponse.statusText}`;
+          try {
+            const errorData = JSON.parse(responseText);
+            errorDetail = errorData.detail || errorData.error || JSON.stringify(errorData);
+          } catch (jsonError) {
+            errorDetail = responseText || errorDetail;
+          }
+          console.error("App: Failed to fetch skills:", errorDetail);
+          setSkillsError(errorDetail);
+          setAvailableSkills({});
+        }
+      } catch (error) {
+        console.error("App: Error fetching skills:", error);
+        setSkillsError(`App: Error fetching skills: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      setSkillsLoading(false);
+    };
+
+    fetchSkillsForApp();
     fetchRecentActivity();
     fetchSystemStatus();
   }, []);
+
+  // Prepare combined task types for AnalyticsDashboard filter
+  const analyticsTaskTypeOptions: FilterTaskType[] = [
+    ...llmTaskTypes,
+    ...Object.entries(availableSkills).map(([skillKey, { skill_name }]) => ({
+      name: skill_name || skillKey, // Use skill_name if available, else the key
+      value: skillKey, // The key is the value for submission
+    }))
+  ].sort((a, b) => a.name.localeCompare(b.name)); // Sort them for display
 
   return (
     <div className="dashboard-container">
@@ -274,7 +301,14 @@ function App() {
       <main className="dashboard-main">
         <section className="dashboard-section task-submission">
           <h2>Submit New Task</h2>
-          <TaskForm onSubmit={handleTaskSubmit} isSubmitting={isLoading} />
+          <TaskForm
+            onSubmit={handleTaskSubmit}
+            isSubmitting={isLoading}
+            llmTaskTypes={llmTaskTypes}
+            availableSkills={availableSkills}
+            skillsLoading={skillsLoading}
+            skillsError={skillsError}
+          />
           {isLoading && <p className="loading-message">Processing...</p>}
           {response && (
             <div className="response-area success">
@@ -322,7 +356,9 @@ function App() {
         </section>
         <section className="dashboard-section analytics-section">
           <h2>Interactive Analytics Dashboard</h2>
-          <AnalyticsDashboard />
+          <Suspense fallback={<div>Loading Analytics Dashboard...</div>}>
+            <AnalyticsDashboard availableTaskTypes={analyticsTaskTypeOptions} />
+          </Suspense>
         </section>
       </main>
     </div>
