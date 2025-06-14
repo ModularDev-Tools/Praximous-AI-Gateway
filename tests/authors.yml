@@ -1,0 +1,22 @@
+thegiblets:
+  name: The Giblets
+  title: Founder & Lead Developer of Praximous
+  url: https://github.com/TheGiblets # Replace with your actual GitHub profile or website
+  image_url: https://github.com/TheGiblets.png # Your GitHub profile picture, or a local path like /img/thegiblets.png
+  # page: true # Uncomment if you want a dedicated author page for "thegiblets"
+  # socials:
+  #   x: your_x_handle
+  #   linkedin: your_linkedin_profile
+  #   github: TheGiblets
+
+yangshun:
+  name: Yangshun Tay
+  title: Ex-Meta Staff Engineer, Co-founder GreatFrontEnd
+  url: https://linkedin.com/in/yangshun
+  image_url: https://github.com/yangshun.png
+
+slorber:
+  name: Sébastien Lorber
+  title: Docusaurus maintainer
+  url: https://sebastienlorber.com
+  image_url: https://github.com/slorber.png
