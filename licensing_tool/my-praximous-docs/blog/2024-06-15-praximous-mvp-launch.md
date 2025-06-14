@@ -1,7 +1,7 @@
 ---
 slug: praximous-mvp-launch
 title: Praximous MVP is Here! Announcing Our Secure AI Gateway
-authors: [thegiblets] # Corresponds to an author defined in docusaurus.config.js or authors.yml
+authors: [JamesTheGiblet] # Corresponds to an author defined in docusaurus.config.js or authors.yml
 tags: [launch, mvp, product-update, ai, llm, enterprise, security, on-premise]
 date: 2024-06-15T10:00:00.000Z # Optional: explicit date, otherwise inferred from filename
 ---

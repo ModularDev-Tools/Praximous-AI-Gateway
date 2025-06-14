@@ -1,0 +1,22 @@
+JamesTheGiblet:
+  name: James The Giblet # Or your preferred display name
+  title: Founder & Lead Developer of Praximous
+  url: https://github.com/JamesTheGiblet
+  image_url: https://github.com/JamesTheGiblet.png
+  # page: true # Uncomment if you want a dedicated author page for "thegiblets"
+  # socials:
+  #   x: your_x_handle
+  #   linkedin: your_linkedin_profile
+  #   github: JamesTheGiblet
+
+yangshun:
+  name: Yangshun Tay
+  title: Ex-Meta Staff Engineer, Co-founder GreatFrontEnd
+  url: https://linkedin.com/in/yangshun
+  image_url: https://github.com/yangshun.png
+
+slorber:
+  name: Sébastien Lorber
+  title: Docusaurus maintainer
+  url: https://sebastienlorber.com
+  image_url: https://github.com/slorber.png

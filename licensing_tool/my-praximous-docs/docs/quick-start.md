@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed:
 First, clone the Praximous repository to your local machine:
 
 ```bash
-git clone https://github.com/TheGiblets/Praximous.git # Replace with your actual repository URL
+git clone https://github.com/JamesTheGiblet/Praximous.git # Replace with your actual repository URL
 cd Praximous # Or your project directory name, e.g., praximous_mvp_scaffold
 ```
 

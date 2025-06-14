@@ -21,14 +21,18 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: 'https://TheGiblets.github.io', // Assuming your GitHub username is TheGiblets
+  url: 'https://JamesTheGiblet.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/Praximous-Docs/', // Assuming your Docusaurus project/repo is named Praximous-Docs
 
+  // Explicitly set trailingSlash to false for cleaner URLs, especially with GitHub Pages.
+  // Or set to true if you prefer all URLs to end with a slash.
+  trailingSlash: false,
+
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'The Giblets', // Usually your GitHub org/user name.
+  organizationName: 'JamesTheGiblet', // Your GitHub org/user name.
   projectName: 'Praximous-Docs', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -52,7 +56,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/JamesTheGiblet/Praximous-Docs/tree/main/', // Point to your docs repo
         },
         blog: {
           showReadingTime: true,
@@ -64,7 +68,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/JamesTheGiblet/Praximous-Docs/tree/main/', // Point to your docs repo blog posts
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -97,7 +101,7 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/JamesTheGiblet/Praximous', // Link to your main Praximous project
             label: 'GitHub',
             position: 'right',
           },
@@ -141,12 +145,12 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/JamesTheGiblet/Praximous', // Link to your main Praximous project
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Praximous (JamesTheGiblet). Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,
