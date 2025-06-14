@@ -11,6 +11,9 @@ from cryptography.hazmat.backends import default_backend
 # Adjust import path to use the core license generator
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Import the core_load_private_key and create_signed_license_payload from your core module
+from core.license_generator import core_load_private_key, create_signed_license_payload
+
 # Define key file names (your "crypto key giblets")
 PRIVATE_KEY_FILE = "praximous_signing_private.pem"
 PUBLIC_KEY_FILE = "praximous_signing_public.pem"
