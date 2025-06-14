@@ -87,42 +87,8 @@ app = FastAPI(
     description="Secure, On-Premise AI Gateway"
 )
 
-# --- UPDATED: Setup for serving the React GUI ---
-# Determine the project root directory relative to this file (api/server.py)
-# server.py -> api -> project_root
-PROJECT_ROOT_DIR = Path(__file__).resolve().parent.parent
-REACT_APP_BUILD_DIR = PROJECT_ROOT_DIR / "frontend-react" / "dist"
+# --- API ENDPOINTS MUST BE DEFINED BEFORE THE CATCH-ALL STATIC FILE SERVING ---
 
-# Serve static assets (JS, CSS, images) from the React app's build output.
-# Vite typically places these in an 'assets' subfolder within 'dist'.
-# Adjust the path if your Vite build configuration is different.
-if (REACT_APP_BUILD_DIR / "assets").is_dir():
-    app.mount("/assets", StaticFiles(directory=(REACT_APP_BUILD_DIR / "assets")), name="react-assets")
-else:
-    log.warning(f"React assets directory not found at {REACT_APP_BUILD_DIR / 'assets'}. GUI may not load correctly.")
-
-# Serve the main index.html for any other GET request that doesn't match an API route.
-# This allows client-side routing in the React app to function correctly.
-@app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
-async def serve_react_app(full_path: str):
-    index_html_path = REACT_APP_BUILD_DIR / "index.html"
-    # Attempt to serve a static file if full_path points to an existing file in the build directory
-    # e.g., /vite.svg should serve REACT_APP_BUILD_DIR/vite.svg
-    potential_static_file = (REACT_APP_BUILD_DIR / full_path.lstrip("/")).resolve()
-
-    # Security check: ensure the resolved path is still within REACT_APP_BUILD_DIR
-    if potential_static_file.is_file() and str(potential_static_file).startswith(str(REACT_APP_BUILD_DIR.resolve())):
-        # Let FileResponse guess the media type based on the file extension
-        return FileResponse(potential_static_file)
-
-    # Fallback to serving index.html for SPA routing if no specific file matched
-    if not index_html_path.is_file():
-        log.error(f"React app index.html not found at {index_html_path}. Ensure the React app is built.")
-        return HTMLResponse(content="Praximous React App not found. Please build the frontend application.", status_code=404)
-    return FileResponse(index_html_path) # Serve index.html using FileResponse
-# --- END UPDATED REACT GUI SETUP ---
-
-# ... (process_task endpoint is unchanged from the last step) ...
 @app.post("/api/v1/process", response_model=ProcessResponse)
 async def process_task(request: ProcessRequest):
     request_id = str(uuid.uuid4())
@@ -181,7 +147,6 @@ async def process_task(request: ProcessRequest):
         log_interaction(request_id=request_id, task_type=request.task_type, status=status, latency_ms=latency_ms, provider=provider, prompt=request.prompt, response_data=response_data)
 
 
-# --- MODIFIED ENDPOINT ---
 @app.get("/api/v1/analytics", response_model=AnalyticsResponse, summary="Get interaction records with pagination and filtering")
 async def get_analytics_data(
     limit: int = Query(50, ge=1, le=500),
@@ -190,6 +155,7 @@ async def get_analytics_data(
     start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
     end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
 ):
+    # ... (implementation of get_analytics_data remains the same)
     """
     Retrieves a paginated and optionally filtered list of interactions from the audit database.
     """
@@ -211,11 +177,10 @@ async def get_analytics_data(
     except Exception as e:
         log.error(f"Failed to retrieve analytics data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve analytics data.")
-# --- END MODIFIED ---
 
-# --- NEW: System Status Endpoint ---
 @app.get("/api/v1/system-status", response_model=SystemStatusResponse, summary="Get the status of configured LLM providers")
 async def get_system_status():
+    # ... (implementation of get_system_status remains the same)
     provider_statuses: List[ProviderStatus] = []
     try:
         with open(PROVIDERS_CONFIG_PATH, 'r') as f:
@@ -243,21 +208,19 @@ async def get_system_status():
                         provider_statuses.append(ProviderStatus(name=name, status="Error", details="Failed to initialize (e.g., missing API key or configuration issue). Check server logs."))
         else:
             log.warning("providers.yaml not found or improperly formatted for system status check.")
-            # Optionally return an empty list or a specific message
 
     except Exception as e:
         log.error(f"Error fetching system status: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve system status.")
     return SystemStatusResponse(providers_status=provider_statuses)
-# --- END NEW SYSTEM STATUS ENDPOINT ---
 
-# --- NEW CHART DATA ENDPOINTS ---
 @app.get("/api/v1/analytics/charts/tasks-over-time", response_model=List[TasksOverTimeDataPoint], summary="Get data for tasks over time chart")
 async def get_chart_tasks_over_time(
     start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
     end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
     granularity: str = Query("day", description="Granularity of time grouping: 'day', 'month', 'year'")
 ):
+    # ... (implementation remains the same)
     try:
         if granularity not in ["day", "month", "year"]:
             raise HTTPException(status_code=400, detail="Invalid granularity. Must be 'day', 'month', or 'year'.")
@@ -272,6 +235,7 @@ async def get_chart_requests_per_provider(
     start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
     end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
 ):
+    # ... (implementation remains the same)
     try:
         data = get_requests_per_provider_data(start_date=start_date, end_date=end_date)
         return data
@@ -284,6 +248,7 @@ async def get_chart_average_latency_per_provider(
     start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
     end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
 ):
+    # ... (implementation remains the same)
     try:
         data = get_average_latency_per_provider_data(start_date=start_date, end_date=end_date)
         return data
@@ -291,12 +256,9 @@ async def get_chart_average_latency_per_provider(
         log.error(f"Failed to retrieve average latency per provider chart data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve average latency per provider chart data.")
 
-# --- END NEW CHART DATA ENDPOINTS ---
-
-
-# ... (list_skills_capabilities and get_skill_capabilities endpoints are unchanged) ...
 @app.get("/api/v1/skills", summary="List all available skills and their capabilities")
 async def list_skills_capabilities():
+    # ... (implementation remains the same)
     capabilities = {}
     for skill_name, skill_class in skill_manager.skills.items():
         try:
@@ -309,6 +271,7 @@ async def list_skills_capabilities():
 
 @app.get("/api/v1/skills/{skill_name}/capabilities", summary="Get capabilities of a specific skill")
 async def get_skill_capabilities(skill_name: str):
+    # ... (implementation remains the same)
     skill_class = skill_manager.get_skill(skill_name)
     if not skill_class:
         raise HTTPException(status_code=404, detail=f"Skill '{skill_name}' not found.")
@@ -318,3 +281,40 @@ async def get_skill_capabilities(skill_name: str):
     except Exception as e:
         log.error(f"Error getting capabilities for skill {skill_name}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve skill capabilities.")
+
+# --- END API ENDPOINTS ---
+
+# --- UPDATED: Setup for serving the React GUI ---
+# Determine the project root directory relative to this file (api/server.py)
+# server.py -> api -> project_root
+PROJECT_ROOT_DIR = Path(__file__).resolve().parent.parent
+REACT_APP_BUILD_DIR = PROJECT_ROOT_DIR / "frontend-react" / "dist"
+
+# Serve static assets (JS, CSS, images) from the React app's build output.
+# Vite typically places these in an 'assets' subfolder within 'dist'.
+# Adjust the path if your Vite build configuration is different.
+if (REACT_APP_BUILD_DIR / "assets").is_dir():
+    app.mount("/assets", StaticFiles(directory=(REACT_APP_BUILD_DIR / "assets")), name="react-assets")
+else:
+    log.warning(f"React assets directory not found at {REACT_APP_BUILD_DIR / 'assets'}. GUI may not load correctly.")
+
+# Serve the main index.html for any other GET request that doesn't match an API route.
+# This allows client-side routing in the React app to function correctly.
+@app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
+async def serve_react_app(full_path: str):
+    index_html_path = REACT_APP_BUILD_DIR / "index.html"
+    # Attempt to serve a static file if full_path points to an existing file in the build directory
+    # e.g., /vite.svg should serve REACT_APP_BUILD_DIR/vite.svg
+    potential_static_file = (REACT_APP_BUILD_DIR / full_path.lstrip("/")).resolve()
+
+    # Security check: ensure the resolved path is still within REACT_APP_BUILD_DIR
+    if potential_static_file.is_file() and str(potential_static_file).startswith(str(REACT_APP_BUILD_DIR.resolve())):
+        # Let FileResponse guess the media type based on the file extension
+        return FileResponse(potential_static_file)
+
+    # Fallback to serving index.html for SPA routing if no specific file matched
+    if not index_html_path.is_file():
+        log.error(f"React app index.html not found at {index_html_path}. Ensure the React app is built.")
+        return HTMLResponse(content="Praximous React App not found. Please build the frontend application.", status_code=404)
+    return FileResponse(index_html_path) # Serve index.html using FileResponse
+# --- END UPDATED REACT GUI SETUP ---

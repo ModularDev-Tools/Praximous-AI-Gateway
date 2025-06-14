@@ -52,22 +52,29 @@ const AnalyticsDashboard: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/v1/analytics?${queryParams}`);
-      if (!response.ok) {
-        let errorDetail = `Failed to fetch analytics: ${response.status} ${response.statusText}`;
+      const apiResponse = await fetch(`/api/v1/analytics?${queryParams}`);
+      const responseText = await apiResponse.text();
+
+      if (!apiResponse.ok) {
+        let errorDetail = `Failed to fetch analytics: ${apiResponse.status} ${apiResponse.statusText}`;
         try {
           // Attempt to parse error response as JSON
-          const errorData = await response.json();
+          const errorData = JSON.parse(responseText);
           errorDetail = errorData.detail || JSON.stringify(errorData);
         } catch (jsonError) {
           // If not JSON, use the response text or a generic message
-          errorDetail = await response.text() || errorDetail;
+          errorDetail = responseText || errorDetail;
         }
         throw new Error(errorDetail);
       }
-      const data: AnalyticsData = await response.json();
-      setAnalyticsData(data);
-      setOffset(currentOffset); // Update offset if fetch was successful
+      try {
+        const data: AnalyticsData = JSON.parse(responseText);
+        setAnalyticsData(data);
+        setOffset(currentOffset); // Update offset if fetch was successful
+      } catch (e) {
+        console.error("Failed to parse analytics JSON:", responseText, e);
+        throw new Error("Received analytics data is not valid JSON.");
+      }
     } catch (err: any) {
       console.error("Error fetching analytics:", err);
       setError(err.message);

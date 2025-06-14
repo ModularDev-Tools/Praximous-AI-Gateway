@@ -13,6 +13,12 @@ interface TaskFormProps {
   isSubmitting: boolean;
 }
 
+interface SkillCapability {
+  skill_name: string;
+  description: string;
+  // Add other fields if needed from your get_capabilities() response
+}
+
 interface InteractionRecord {
   id: number;
   request_id: string;
@@ -31,8 +37,22 @@ interface ProviderStatusRecord {
 }
 
 function TaskForm({ onSubmit, isSubmitting }: TaskFormProps) {
-  const [taskType, setTaskType] = useState<string>('default_llm_tasks');
+  const defaultTaskType = 'default_llm_tasks';
+  const [taskType, setTaskType] = useState<string>(defaultTaskType);
   const [prompt, setPrompt] = useState<string>('');
+  const [availableSkills, setAvailableSkills] = useState<Record<string, SkillCapability>>({});
+  const [skillsLoading, setSkillsLoading] = useState<boolean>(true);
+  const [skillsError, setSkillsError] = useState<string | null>(null);
+
+  // LLM task types (could eventually be fetched from backend if they become more dynamic)
+  const llmTaskTypes = [
+    { name: "Default LLM Tasks", value: "default_llm_tasks" },
+    { name: "Internal Summary (LLM)", value: "internal_summary" },
+    // Add other LLM task types from your ModelRouter here
+  ];
+
+  // Sort skills by name for consistent dropdown order
+  const sortedSkillNames = Object.keys(availableSkills).sort();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,18 +63,73 @@ function TaskForm({ onSubmit, isSubmitting }: TaskFormProps) {
     onSubmit({ task_type: taskType, prompt });
   };
 
+  useEffect(() => {
+    const fetchSkills = async () => {
+      setSkillsLoading(true);
+      setSkillsError(null);
+      try {
+        const apiResponse = await fetch('/api/v1/skills');
+        const responseText = await apiResponse.text();
+
+        if (apiResponse.ok) {
+          try {
+            const data: Record<string, SkillCapability> = JSON.parse(responseText);
+            setAvailableSkills(data);
+            if (Object.keys(data).length === 0) {
+              console.warn("Received an empty list of skills from the API.");
+            }
+          } catch (e) {
+            console.error("Failed to parse skills JSON:", responseText, e);
+            throw new Error("Received skills data is not valid JSON.");
+          }
+        } else {
+          let errorDetail = `Failed to load skills: ${apiResponse.status} ${apiResponse.statusText}`;
+          try {
+            // Attempt to parse error response as JSON
+            const errorData = JSON.parse(responseText);
+            errorDetail = errorData.detail || errorData.error || JSON.stringify(errorData); // Check for common error fields
+          } catch (jsonError) {
+            // If not JSON, use the response text or a generic message
+            errorDetail = responseText || errorDetail;
+          }
+          console.error("Failed to fetch skills:", errorDetail);
+          setSkillsError(errorDetail);
+          setAvailableSkills({}); // Clear skills on error
+        }
+      } catch (error) {
+        console.error("Error fetching skills:", error);
+        setSkillsError(`Error fetching skills: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      setSkillsLoading(false);
+    };
+    fetchSkills();
+  }, []);
+
   return (
     <form onSubmit={handleSubmit} className="task-form">
       <div className="form-group">
         <label htmlFor="taskType">Task Type:</label>
-        <input
-          type="text"
+        <select
           id="taskType"
           value={taskType}
           onChange={(e) => setTaskType(e.target.value)}
-          placeholder="e.g., default_llm_tasks, echo"
           disabled={isSubmitting}
-        />
+        >
+          <optgroup label="LLM Tasks">
+            {llmTaskTypes.map(llmTask => (
+              <option key={llmTask.value} value={llmTask.value}>{llmTask.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Smart Skills">
+            {skillsLoading && <option disabled>Loading skills...</option>}
+            {skillsError && <option disabled>Error: {skillsError}</option>}
+            {!skillsLoading && !skillsError && sortedSkillNames.length === 0 && <option disabled>No smart skills found</option>}
+            {!skillsLoading && !skillsError && sortedSkillNames.map(skillName => (
+                <option key={skillName} value={skillName}>{availableSkills[skillName]?.skill_name || skillName}</option>
+              ))
+            }
+          </optgroup>
+        </select>
       </div>
       <div className="form-group">
         <label htmlFor="prompt">Prompt:</label>
@@ -95,18 +170,26 @@ function App() {
         body: JSON.stringify(taskData),
       });
 
-      const responseData = await apiResponse.json();
+      const responseText = await apiResponse.text();
 
       if (apiResponse.ok) {
-        setResponse(responseData);
+        try {
+          const responseData = JSON.parse(responseText);
+          setResponse(responseData);
+        } catch (e) {
+          console.error("Failed to parse task response JSON:", responseText, e);
+          throw new Error("Received task response data is not valid JSON.");
+        }
       } else {
         let errorDetailMessage = `Error ${apiResponse.status}: `;
         try {
-            errorDetailMessage += responseData.detail || JSON.stringify(responseData);
-        } catch (e) {
-            errorDetailMessage += apiResponse.statusText || "Unknown error processing task";
+            const errorData = JSON.parse(responseText);
+            errorDetailMessage += errorData.detail || JSON.stringify(errorData);
+        } catch (jsonParseError) {
+            errorDetailMessage += responseText || apiResponse.statusText || "Unknown error processing task";
         }
         setError(errorDetailMessage);
+        setResponse(null);
       }
     } catch (err: any) { // Catching 'any' for simplicity, can be more specific
       console.error('Error submitting task:', err);
@@ -121,21 +204,28 @@ function App() {
   const fetchRecentActivity = async () => {
     try {
       const apiResponse = await fetch('/api/v1/analytics?limit=5&offset=0'); // Fetch latest 5
+      const responseText = await apiResponse.text();
+
       if (apiResponse.ok) {
-        const data = await apiResponse.json();
-        setRecentActivity(data.data || []);
+        try {
+          const data = JSON.parse(responseText);
+          setRecentActivity(data.data || []);
+        } catch (e) {
+          console.error("Failed to parse recent activity JSON:", responseText, e);
+          throw new Error("Received recent activity data is not valid JSON.");
+        }
       } else {
         let errorDetail = `Failed to fetch recent activity: ${apiResponse.status} ${apiResponse.statusText}`;
         try {
-            const errorData = await apiResponse.json(); // Try to parse error as JSON
+            const errorData = JSON.parse(responseText); // Try to parse error as JSON
             errorDetail = errorData.detail || JSON.stringify(errorData);
         } catch (jsonError) {
-            errorDetail = await apiResponse.text() || errorDetail; // Fallback to text
+            errorDetail = responseText || errorDetail; // Fallback to text
         }
         console.error(errorDetail);
         setRecentActivity([]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching recent activity:', err);
       setRecentActivity([]);
     }
@@ -144,21 +234,28 @@ function App() {
   const fetchSystemStatus = async () => {
     try {
       const apiResponse = await fetch('/api/v1/system-status');
+      const responseText = await apiResponse.text();
+
       if (apiResponse.ok) {
-        const data = await apiResponse.json();
-        setSystemStatus(data.providers_status || []);
+        try {
+          const data = JSON.parse(responseText);
+          setSystemStatus(data.providers_status || []);
+        } catch (e) {
+          console.error("Failed to parse system status JSON:", responseText, e);
+          throw new Error("Received system status data is not valid JSON.");
+        }
       } else {
         let errorDetail = `Failed to fetch system status: ${apiResponse.status} ${apiResponse.statusText}`;
         try {
-            const errorData = await apiResponse.json();
+            const errorData = JSON.parse(responseText);
             errorDetail = errorData.detail || JSON.stringify(errorData);
         } catch (jsonError) {
-            errorDetail = await apiResponse.text() || errorDetail;
+            errorDetail = responseText || errorDetail;
         }
         console.error(errorDetail);
         setSystemStatus([{ name: "System Status", status: "Error", details: `Could not fetch status. Server said: ${errorDetail.substring(0,100)}...` }]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching system status:', err);
       setSystemStatus([{ name: "System Status", status: "Error", details: "Network error fetching status." }]);
     }

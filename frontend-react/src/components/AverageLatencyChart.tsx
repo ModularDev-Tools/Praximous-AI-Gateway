@@ -27,8 +27,16 @@ const AverageLatencyChart: React.FC<AverageLatencyProps> = ({ startDate, endDate
       try {
         const response = await fetch(`/api/v1/analytics/charts/average-latency-per-provider${queryParams ? '?' + queryParams : ''}`);
         if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.detail || `Failed to fetch average latency data: ${response.statusText}`);
+          let errorDetail = `Failed to fetch average latency data: ${response.status} ${response.statusText}`;
+          try {
+            // Attempt to parse error response as JSON
+            const errorData = await response.json();
+            errorDetail = errorData.detail || JSON.stringify(errorData);
+          } catch (jsonError) {
+            // If not JSON, use the response text or a generic message
+            errorDetail = await response.text() || errorDetail;
+          }
+          throw new Error(errorDetail);
         }
         const result: ChartDataPoint[] = await response.json();
         setData(result.map(item => ({ ...item, average_latency: parseFloat(item.average_latency.toFixed(0)) }))); // Round to integer for display

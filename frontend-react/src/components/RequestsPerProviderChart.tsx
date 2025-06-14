@@ -27,8 +27,16 @@ const RequestsPerProviderChart: React.FC<RequestsPerProviderProps> = ({ startDat
       try {
         const response = await fetch(`/api/v1/analytics/charts/requests-per-provider${queryParams ? '?' + queryParams : ''}`);
         if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.detail || `Failed to fetch requests per provider data: ${response.statusText}`);
+          let errorDetail = `Failed to fetch requests per provider data: ${response.status} ${response.statusText}`;
+          try {
+            // Attempt to parse error response as JSON
+            const errorData = await response.json();
+            errorDetail = errorData.detail || JSON.stringify(errorData);
+          } catch (jsonError) {
+            // If not JSON, use the response text or a generic message
+            errorDetail = await response.text() || errorDetail;
+          }
+          throw new Error(errorDetail);
         }
         const result: ChartDataPoint[] = await response.json();
         setData(result);
