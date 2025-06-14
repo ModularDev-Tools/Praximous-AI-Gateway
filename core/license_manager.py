@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Dict, Set
 from core.logger import log
 import os # For a temporary mock license tier
+from core.license import get_active_license_info # Import the new license verification
 
 class LicenseTier(Enum):
     COMMUNITY = "community" # Or Free/Basic
@@ -55,14 +56,18 @@ TIER_FEATURES: Dict[LicenseTier, Set[Feature]] = {
 def get_current_license_tier() -> LicenseTier:
     """
     Retrieves the current license tier.
-    Placeholder: In a real system, this would involve validating a license key.
-    For now, we can mock it using an environment variable or default.
+    This now uses the license verification module.
     """
-    mock_tier_str = os.getenv("PRAXIMOUS_LICENSE_TIER", LicenseTier.COMMUNITY.value).lower()
-    try:
-        return LicenseTier(mock_tier_str)
-    except ValueError:
-        log.warning(f"Invalid PRAXIMOUS_LICENSE_TIER: '{mock_tier_str}'. Defaulting to COMMUNITY.")
+    active_license = get_active_license_info()
+
+    if active_license and active_license.is_valid and not active_license.is_expired:
+        log.info(f"Valid license found for {active_license.customer_name}. Tier: {active_license.tier.name}")
+        return active_license.tier
+    elif active_license and active_license.is_expired:
+        log.warning(f"License for {active_license.customer_name} is EXPIRED. Defaulting to Community tier.")
+        return LicenseTier.COMMUNITY
+    else: # No license, invalid license, or other error during verification
+        log.warning("No valid license found or license verification failed. Defaulting to Community tier.")
         return LicenseTier.COMMUNITY
 
 def is_feature_enabled(feature: Feature) -> bool:

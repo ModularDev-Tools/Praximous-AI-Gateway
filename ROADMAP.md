@@ -155,15 +155,15 @@ Tasks:
 
         [✓] Lock down premium features (RAG Interface, RBAC, PII Redaction) for non-Enterprise keys. (PIIRedactionSkill locked down. Placeholder RAG Interface API endpoints created and locked down. RBAC to be locked down when its specific implementation/endpoints are defined.)
 
-    [ ] Cryptographic License Key Generation:
+    [✓] Cryptographic License Key Generation:
 
-        Develop a secure internal tool or service to generate signed license keys (containing customerName, tier, validityPeriodDays).
+        [✓] Develop a secure internal tool or service to generate signed license keys (containing customerName, tier, validityPeriodDays). (Script `licensing_tool/generate_license.py` created and tested)
 
-    [ ] License Verification & Enforcement Module:
+    [>] License Verification & Enforcement Module:
 
-        Build the license.py module within Praximous to handle key validation, first-use activation timestamping, and expiry checks on startup.
+        [✓] Build the license.py module within Praximous to handle key validation, first-use activation timestamping, and expiry checks on startup. (core/license.py created for verification, expiry checks. Simple first-use implicitly handled by env var. core/license_manager.py updated.)
 
-        Implement the "Degraded Functionality" mode for expired licenses and the "Hard Stop" for invalid keys.
+        [✓] Implement the "Degraded Functionality" mode for expired licenses and the "Hard Stop" for invalid keys. (Degraded to Community tier on expiry/invalid key implemented in license_manager.py)
 
     [ ] Website: Automated Purchase & Provisioning:
 
