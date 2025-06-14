@@ -149,7 +149,7 @@ Tasks:
         Develop and integrate a broader range of sophisticated Smart Skills (e.g., data analysis, advanced text processing, integration with common business tools, RAG components).
         Provide clear documentation and templates for creating new custom skills.
 
-    [>] Tiered Licensing Logic:
+    [✓] Tiered Licensing Logic:
 
         [✓] Implement feature flags in the application code based on the license key's tier field (Pro vs. Enterprise). (Initial mechanism in core/license_manager.py)
 
