@@ -38,8 +38,8 @@ def generate_fake_data(num_records=100):
         print(f"Error ensuring table exists: {e}")
         return
 
-    task_types = ["default_llm_tasks", "echo", "text_manipulation", "simple_math", "internal_summary"]
-    providers = ["gemini_pro_model", "ollama_default", "skill:echo", "skill:text_manipulation", "skill:simple_math", None]
+    task_types = ["default_llm_tasks", "echo", "text_manipulation", "simple_math", "internal_summary", "datetime_tool", "weather_tool", "web_scraper", "csv_parser", "sentiment_analyzer"]
+    providers = ["gemini_pro_model", "ollama_default", "skill:echo", "skill:text_manipulation", "skill:simple_math", "skill:internal_summary", "skill:datetime_tool", "skill:weather_tool", "skill:web_scraper", "skill:csv_parser", "skill:sentiment_analyzer", None]
     statuses = ["success", "error"]
     sample_prompts = [
         "What is the capital of France?",
@@ -47,7 +47,13 @@ def generate_fake_data(num_records=100):
         "Hello there!",
         "Convert this to uppercase: test",
         "Calculate 2 + 2",
-        "Summarize the following text: ..."
+        "Summarize the following text: ...",
+        "What time is it in London?",
+        "Get current weather for Berlin",
+        "Extract text from example.com",
+        "What's the date today?",
+        "name,value\nitem1,10\nitem2,20", # Sample CSV data
+        "I love using Praximous, it's fantastic!" # Sample text for sentiment
     ]
 
     records_to_insert = []
