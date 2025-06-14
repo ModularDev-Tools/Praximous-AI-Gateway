@@ -70,7 +70,9 @@ def get_all_interactions(
     offset: int = 0, 
     task_type: Optional[str] = None,
     start_date: Optional[str] = None, # YYYY-MM-DD
-    end_date: Optional[str] = None    # YYYY-MM-DD
+    end_date: Optional[str] = None,   # YYYY-MM-DD
+    sort_by: Optional[str] = None,    # Column name to sort by
+    sort_order: str = "desc"          # "asc" or "desc"
 ) -> List[Dict[str, Any]]:
     """
     Retrieves a paginated and optionally filtered list of interaction records by task_type and date range.
@@ -78,6 +80,11 @@ def get_all_interactions(
     records = []
     if not os.path.exists(DB_PATH):
         return records
+
+    # Validate sort_by to prevent SQL injection and ensure it's a valid column
+    allowed_sort_columns = ["id", "request_id", "timestamp", "task_type", "provider", "status", "latency_ms"]
+    if sort_by and sort_by not in allowed_sort_columns:
+        sort_by = "timestamp" # Default to timestamp if invalid column is provided
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -103,8 +110,12 @@ def get_all_interactions(
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            # Add ordering, pagination
-            query += " ORDER BY timestamp DESC LIMIT ? OFFSET ?"
+            # Add ordering
+            order_direction = "ASC" if sort_order.lower() == "asc" else "DESC" # Default to DESC
+            sort_column = sort_by if sort_by else "timestamp" # Default sort column
+            query += f" ORDER BY {sort_column} {order_direction}"
+            
+            query += " LIMIT ? OFFSET ?"
             params.extend([limit, offset])
             
             cursor.execute(query, params)

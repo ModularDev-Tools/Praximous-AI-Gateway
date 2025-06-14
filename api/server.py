@@ -153,7 +153,9 @@ async def get_analytics_data(
     offset: int = Query(0, ge=0),
     task_type: Optional[str] = Query(None, description="Filter records by a specific task_type"),
     start_date: Optional[str] = Query(None, description="Filter records from this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
-    end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$")
+    end_date: Optional[str] = Query(None, description="Filter records up to this date (YYYY-MM-DD)", regex="^\d{4}-\d{2}-\d{2}$"),
+    sort_by: Optional[str] = Query("timestamp", description="Column to sort by (e.g., timestamp, task_type, status, latency_ms)"),
+    sort_order: Optional[str] = Query("desc", description="Sort order: 'asc' or 'desc'")
 ):
     # ... (implementation of get_analytics_data remains the same)
     """
@@ -162,11 +164,13 @@ async def get_analytics_data(
     try:
         records = get_all_interactions(
             limit=limit, offset=offset, task_type=task_type, 
-            start_date=start_date, end_date=end_date
+            start_date=start_date, end_date=end_date,
+            sort_by=sort_by, sort_order=sort_order or "desc"
         )
         total_matches = count_interactions(
             task_type=task_type, 
-            start_date=start_date, end_date=end_date
+            start_date=start_date, 
+            end_date=end_date
         )
         return AnalyticsResponse(
             total_matches=total_matches,

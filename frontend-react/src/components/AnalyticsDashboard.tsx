@@ -47,7 +47,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTy
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [selectedLog, setSelectedLog] = useState<InteractionRecord | null>(null);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'timestamp', direction: 'descending' });
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'timestamp', direction: 'descending' }); // key can be keyof InteractionRecord
 
   const fetchAnalytics = async (currentOffset = offset) => {
     setIsLoading(true);
@@ -61,6 +61,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTy
     }
     if (endDate) {
       queryParams += `&end_date=${endDate}`;
+    }
+    if (sortConfig.key) {
+      queryParams += `&sort_by=${sortConfig.key}`;
+      queryParams += `&sort_order=${sortConfig.direction}`;
     }
 
     try {
@@ -98,11 +102,12 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTy
 
   useEffect(() => {
     fetchAnalytics(0); // Fetch initial data with offset 0
-  }, [limit]); // Refetch if limit changes
+    // Also refetch if sortConfig changes
+  }, [limit, sortConfig]); // Refetch if limit or sortConfig changes
 
   const handleFilterSubmit = (e: FormEvent) => {
     e.preventDefault();
-    fetchAnalytics(0); // Reset to first page on new filter submission
+    fetchAnalytics(0); // Reset to first page on new filter submission, will use current sortConfig
   };
 
   const handleNextPage = () => {
@@ -126,37 +131,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTy
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
-    setSortConfig({ key, direction });
+    setSortConfig({ key, direction }); // This will trigger useEffect to refetch with new sort params
   };
-
-  const sortedData = React.useMemo(() => {
-    if (!analyticsData?.data) return [];
-    let sortableItems = [...analyticsData.data];
-    if (sortConfig.key !== null) {
-      sortableItems.sort((a, b) => {
-        const valA = a[sortConfig.key!];
-        const valB = b[sortConfig.key!];
-
-        if (valA === null || valA === undefined) return sortConfig.direction === 'ascending' ? 1 : -1;
-        if (valB === null || valB === undefined) return sortConfig.direction === 'ascending' ? -1 : 1;
-
-        if (typeof valA === 'number' && typeof valB === 'number') {
-          return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
-        }
-        // Default to string comparison for other types (like timestamp, task_type, provider, status)
-        const stringA = String(valA).toLowerCase();
-        const stringB = String(valB).toLowerCase();
-        if (stringA < stringB) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (stringA > stringB) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
-  }, [analyticsData, sortConfig]);
 
   return (
     <div className="analytics-dashboard">
@@ -251,13 +227,14 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ availableTaskTy
                 </tr>
               </thead>
               <tbody>
-                {isLoading && sortedData.length === 0 && (
+                {/* Display data directly from analyticsData.data as it's now sorted by backend */}
+                {isLoading && (!analyticsData || analyticsData.data.length === 0) && (
                   <tr><td colSpan={6} style={{ textAlign: 'center' }}>Loading data...</td></tr>
                 )}
-                {!isLoading && sortedData.length === 0 && analyticsData && (
+                {!isLoading && analyticsData && analyticsData.data.length === 0 && (
                   <tr><td colSpan={6} style={{ textAlign: 'center' }}>No records found for the selected filters.</td></tr>
                 )}
-                {sortedData.map((record) => (
+                {analyticsData?.data.map((record) => (
                   <tr key={record.id} onClick={() => handleRowClick(record)} className="log-row-clickable">
                     <td>{new Date(record.timestamp).toLocaleString()}</td>
                     <td>{record.task_type}</td>
