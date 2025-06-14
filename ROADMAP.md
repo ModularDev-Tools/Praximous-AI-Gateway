@@ -137,13 +137,17 @@ Tasks:
 
     [✓] Test code for interface (Initial tests for SkillLibrary component implemented)
     
-✅ Milestone: Praximous features a comprehensive and user-friendly GUI, allowing users to easily submit tasks, monitor system activity, analyze usage patterns, and manage skills, significantly improving the overall user experience and administrative efficiency.
+✅ Milestone: Praximous features a comprehensive and user-friendly GUI, allowing users to easily submit tasks, monitor system activity, analyze usage patterns, view skill capabilities, and inspect system configurations, significantly improving the overall user experience and administrative efficiency.
 
 Phase 6: 📈 Commercialization & Go-to-Market
 
 Goal: Implement the business logic, licensing system, and online presence required for commercial sales and product-led growth.
 
 Tasks:
+
+    [ ] Expand Core Skill Library:
+        Develop and integrate a broader range of sophisticated Smart Skills (e.g., data analysis, advanced text processing, integration with common business tools, RAG components).
+        Provide clear documentation and templates for creating new custom skills.
 
     [ ] Tiered Licensing Logic:
 
