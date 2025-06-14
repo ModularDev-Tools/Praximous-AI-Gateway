@@ -2,6 +2,7 @@
 import sys
 import os
 import yaml
+from api.v1.endpoints import rag_interface_router # Import the new RAG router
 
 from core.logger import log # Import the configured logger
 from config.credentials_manager import setup_api_credentials, get_missing_provider_credentials

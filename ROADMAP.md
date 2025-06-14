@@ -153,7 +153,7 @@ Tasks:
 
         [✓] Implement feature flags in the application code based on the license key's tier field (Pro vs. Enterprise). (Initial mechanism in core/license_manager.py)
 
-        [>] Lock down premium features (RAG Interface, RBAC, PII Redaction) for non-Enterprise keys. (PIIRedactionSkill created and locked down; RAG Interface & RBAC to be locked down when implemented)
+        [✓] Lock down premium features (RAG Interface, RBAC, PII Redaction) for non-Enterprise keys. (PIIRedactionSkill locked down. Placeholder RAG Interface API endpoints created and locked down. RBAC to be locked down when its specific implementation/endpoints are defined.)
 
     [ ] Cryptographic License Key Generation:
 
