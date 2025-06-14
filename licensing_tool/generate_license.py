@@ -2,12 +2,14 @@
 import argparse
 import json
 import os
-from datetime import datetime, timezone
-import base64
+import sys
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.backends import default_backend
+
+# Adjust import path to use the core license generator
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Define key file names (your "crypto key giblets")
 PRIVATE_KEY_FILE = "praximous_signing_private.pem"
@@ -19,7 +21,6 @@ os.makedirs(os.path.join(os.path.dirname(__file__), KEY_DIRECTORY), exist_ok=Tru
 
 PRIVATE_KEY_PATH = os.path.join(os.path.dirname(__file__), KEY_DIRECTORY, PRIVATE_KEY_FILE)
 PUBLIC_KEY_PATH = os.path.join(os.path.dirname(__file__), KEY_DIRECTORY, PUBLIC_KEY_FILE)
-
 
 def generate_key_pair():
     """Generates an RSA private/public key pair and saves them to files."""
@@ -51,53 +52,16 @@ def generate_key_pair():
         ))
     print(f"Public key saved to {PUBLIC_KEY_PATH}")
 
-def load_private_key() -> rsa.RSAPrivateKey:
-    """Loads the RSA private key from its file."""
-    if not os.path.exists(PRIVATE_KEY_PATH):
-        raise FileNotFoundError(f"Private key file not found at {PRIVATE_KEY_PATH}. "
-                                "Run with --generate-keys first.")
-    with open(PRIVATE_KEY_PATH, "rb") as key_file:
-        private_key = serialization.load_pem_private_key(
-            key_file.read(),
-            password=None, # Add password if key is encrypted
-            backend=default_backend()
-        )
-    return private_key
-
 def create_license_key(customer_name: str, tier: str, validity_days: int) -> str:
     """
     Creates a signed license key.
     The license key will be a JSON string containing the payload and its signature,
     both base64 encoded.
     """
-    private_key = load_private_key()
-
-    payload_data = {
-        "customerName": customer_name,
-        "tier": tier.lower(), # Ensure tier is lowercase for consistency
-        "validityPeriodDays": validity_days,
-        "issueDate": datetime.now(timezone.utc).isoformat()
-    }
-    payload_json_str = json.dumps(payload_data, sort_keys=True) # Sort keys for consistent signing
-    payload_bytes = payload_json_str.encode('utf-8')
-
-    # Sign the payload
-    signature = private_key.sign(
-        payload_bytes,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH
-        ),
-        hashes.SHA256()
-    )
-
-    # Create the final license key structure
-    license_key_obj = {
-        "payload": base64.b64encode(payload_bytes).decode('utf-8'),
-        "signature": base64.b64encode(signature).decode('utf-8')
-    }
-
-    return json.dumps(license_key_obj, indent=2) # Pretty print the final JSON license key
+    # Use the core function, loading the key specifically from the tool's key directory
+    private_key = core_load_private_key(PRIVATE_KEY_PATH)
+    license_payload_str = create_signed_license_payload(customer_name, tier, validity_days, private_key)
+    return json.dumps(json.loads(license_payload_str), indent=2) # Pretty print for CLI output
 
 def main():
     parser = argparse.ArgumentParser(description="Praximous License Key Generator")
