@@ -183,6 +183,14 @@ Tasks:
 
 ✅ **Milestone Achieved: Praximous is a commercially viable product.** The website infrastructure can handle automated sales (via MoR integration and webhook), license provisioning is automated, and customer self-service is supported through documentation, enabling a scalable go-to-market strategy.
 
+---
+
+**🎉 MVP Release v1.0 Archived! 🎉**
+
+The stable, working version of the Praximous MVP (tagged as `v1.0-mvp`) has been successfully committed, tagged, and the tag pushed to the remote repository. This officially bookmarks and archives the MVP, ensuring it's safely kept before proceeding to post-MVP development.
+
+---
+
 
 Post-MVP Next Steps
 

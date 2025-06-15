@@ -22,7 +22,7 @@ Praximous is an intelligent, secure AI gateway for enterprises. It serves as a c
 - **🛡️ Resilient Failover Architecture**: Use a primary external LLM (e.g., Gemini), with automatic failover to a secondary provider (e.g., a local Ollama model) to ensure uptime.
 - **🏠 Secure On-Prem Deployment**: Fully containerized via Docker. No cloud dependencies—your data never leaves your environment.
 - **🔌 Pluggable Provider Architecture**: Supports multiple LLM providers. Add or switch models by editing a simple config file.
-- **📊 Analytics & Auditing**: Built-in SQLite logging for every API interaction, providing full traceability, usage tracking, and optimization insights via an analytics endpoint.
+- **📊 Analytics & Auditing**: Built-in SQLite logging for every API interaction, providing full traceability, usage tracking, and optimization insights via an analytics endpoint and the GUI.
 - **🧵 Centralized API Gateway**: One stable, authenticated endpoint for all internal tools and applications.
 - **🎭 Context-Aware Persona**: Defines a unique identity (persona, industry context) for your gateway, ensuring all AI interactions are consistent with your business style.
 - **📜 Tiered Licensing System**: Feature flags and license verification to support different product tiers (e.g., Pro, Enterprise).
@@ -48,96 +48,92 @@ Praximous is an intelligent, secure AI gateway for enterprises. It serves as a c
 ### 2. Get the Code
 
 ```bash
-git clone [https://github.com/JamesTheGiblet/praximous.git](https://github.com/JamesTheGiblet/praximous.git)
-cd praximous
-```
+git clone https://github.com/JamesTheGiblet/praximous_mvp_scaffold.git # Or your specific project repository URL
+cd praximous_mvp_scaffold # Or your specific project directory name
+3. Configure Your Environment
+Copy the environment template to a new .env file.
 
-### 3. Configure Your Environment
-
-Copy the environment template to a new `.env` file.
-
-```bash
+bash
 cp .env.template .env
-```
-Now, open the `.env` file and add your API keys.
+Now, open the .env file and add your API keys.
 
-### 4. Initialize Praximous Identity
+4. Initialize Praximous Identity
+Before the first launch, run the interactive setup wizard. This defines your gateway’s unique identity and persona, creating the config/identity.yaml file.
 
-Before the first launch, run the interactive setup wizard. This defines your gateway’s unique identity and persona, creating the `config/identity.yaml` file.
-
-```bash
+bash
 docker-compose run --rm praximous python main.py --init
-```
-*(Note: This command will also guide you through setting API keys if you skipped the previous step).*
+(Note: This command will also guide you through setting API keys if you skipped the previous step).
 
-### 5. Launch Praximous
-
-```bash
+5. Launch Praximous
+bash
 docker-compose up -d --build
-```
-
 The gateway is now running and accessible.
-- **API URL**: `http://localhost:8000`
-- **Interactive API Docs**: `http://localhost:8000/docs`
 
----
+API URL: http://localhost:8000
+Interactive API Docs: http://localhost:8000/docs
+Praximous GUI: http://localhost:8000/
+Live Documentation (The Dojo): https://JamesTheGiblet.github.io/praximous_mvp_scaffold/
+Blog (The Town Hall): https://JamesTheGiblet.github.io/praximous_mvp_scaffold/blog/
+📡 API Endpoints
+Process a Request
+POST /api/v1/process
+Description: The main endpoint for executing both LLM tasks and local Smart Skills.
+Example Payload for an LLM task:
+json
+{
+  "task_type": "default_llm_tasks",
+  "prompt": "Explain the concept of containerization in three sentences."
+}
+Example Payload for a local skill:
+json
+{
+  "task_type": "echo",
+  "prompt": "Hello world"
+}
+View Analytics
+GET /api/v1/analytics
+Description: Retrieves a paginated and filterable audit log of all interactions.
+Query Parameters:
+limit (int, default: 50): Number of records to return.
+offset (int, default: 0): Number of records to skip (for pagination).
+task_type (string, optional): Filter by a specific task type.
+Example: curl "http://localhost:8000/api/v1/analytics?limit=10&task_type=echo"
+View Skills
+GET /api/v1/skills
+GET /api/v1/skills/{skill_name}/capabilities
+Analytics Chart Data
+GET /api/v1/analytics/charts/tasks-over-time
+GET /api/v1/analytics/charts/requests-per-provider
+GET /api/v1/analytics/charts/average-latency-per-provider
+System & Configuration
+GET /api/v1/system-status: View the status of configured LLM providers.
+GET /api/v1/config/providers: View the content of providers.yaml.
+Premium Features (Enterprise Tier)
+RAG Interface (Placeholder):
+POST /api/v1/rag/query
+GET /api/v1/rag/settings
+PII Redaction Skill:
+task_type: "pii_redactor" via /api/v1/process
+📜 Licensing
+Praximous offers different tiers with varying features. A valid license key (set via the PRAXIMOUS_LICENSE_KEY environment variable) is required to unlock Pro and Enterprise features. License keys are cryptographically signed and validated by the system. For more information, please see our documentation at https://JamesTheGiblet.github.io/praximous_mvp_scaffold/.
+🛠️ Management Commands
+Praximous provides a few command-line utilities for managing your instance, run via python main.py (or docker-compose run --rm praximous python main.py <command> if you prefer to use the Docker environment).
 
-## 📡 API Endpoints
-
-### Process a Request
-- **POST** `/api/v1/process`
-- **Description**: The main endpoint for executing both LLM tasks and local Smart Skills.
-- **Example Payload for an LLM task**:
-  ```json
-  {
-    "task_type": "default_llm_tasks",
-    "prompt": "Explain the concept of containerization in three sentences."
-  }
-  ```
-- **Example Payload for a local skill**:
-  ```json
-  {
-    "task_type": "echo",
-    "prompt": "Hello world"
-  }
-  ```
-
-### View Analytics
-- **GET** `/api/v1/analytics`
-- **Description**: Retrieves a paginated and filterable audit log of all interactions.
-- **Query Parameters**:
-    - `limit` (int, default: 50): Number of records to return.
-    - `offset` (int, default: 0): Number of records to skip (for pagination).
-    - `task_type` (string, optional): Filter by a specific task type.
-- **Example**: `curl "http://localhost:8000/api/v1/analytics?limit=10&task_type=echo"`
-
-### View Skills
-- **GET** `/api/v1/skills`
-
-## 🛠️ Management Commands
-
-Praximous provides a few command-line utilities for managing your instance, run via `python main.py` (or `docker-compose run --rm praximous python main.py <command>` if you prefer to use the Docker environment).
-
-### Initialize Identity (as in Quickstart)
-```bash
+Initialize Identity (as in Quickstart)
+bash
 python main.py --init
-```
-Sets up the initial `config/identity.yaml` and guides through API key configuration.
+Sets up the initial config/identity.yaml and guides through API key configuration.
 
-### Rename System
-```bash
+Rename System
+bash
 python main.py --rename "New-System-Identifier"
-```
-Updates the `system_name` in your `config/identity.yaml`. The display name in logs will update on the next application restart.
+Updates the system_name in your config/identity.yaml. The display name in logs will update on the next application restart.
 
-### Reset Identity
-```bash
+Reset Identity
+bash
 python main.py --reset-identity
-```
-Prompts for confirmation and then deletes the `config/identity.yaml` file, allowing you to re-initialize from scratch. Use with caution.
+Prompts for confirmation and then deletes the config/identity.yaml file, allowing you to re-initialize from scratch. Use with caution.
 
----
-## 🧭 Development Roadmap
-(Your roadmap section can remain as is)
-
-```
+📚 Documentation & Community
+The Dojo (Full Documentation): Visit https://JamesTheGiblet.github.io/praximous_mvp_scaffold/ for comprehensive guides, API references, and tutorials.
+The Town Hall (Blog & Updates): Check out our blog at https://JamesTheGiblet.github.io/praximous_mvp_scaffold/blog/ for the latest news, product updates, and articles.
