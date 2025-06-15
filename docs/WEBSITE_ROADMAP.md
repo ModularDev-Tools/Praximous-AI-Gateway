@@ -11,34 +11,36 @@ Overhaul the Docusaurus website to replace all placeholder content with custom b
 
 ### Tasks:
 
-- [ ] **Update Site Metadata (`docusaurus.config.js`)**  
-  - [ ] Change title to `"Praximous | Secure AI Gateway"`
-  - [ ] Update tagline: `"Your On-Premise Orchestration Layer for Enterprise AI."`
-  - [ ] Set `navbar.title` to `"Praximous"`
-  - [ ] Update copyright:
+- [x] **Update Site Metadata (`docusaurus.config.js`)**  
+  - [x] Change title to `"Praximous | Secure AI Gateway"`
+  - [x] Update tagline: `"Your On-Premise Orchestration Layer for Enterprise AI."`
+  - [x] Set `navbar.title` to `"Praximous"`
+  - [x] Update copyright:
     ```js
     Copyright © ${new Date().getFullYear()} Praximous. All rights reserved.
     ```
 
-- [ ] **Create & Integrate Logo**  
-  - [ ] Design a professional Praximous logo  
-  - [ ] Replace `static/img/logo.svg`  
-  - [ ] Generate and use new `static/img/favicon.ico`
+- [x] **Create & Integrate Logo**  
+  - [x] Design a professional Praximous logo  
+  - [x] Replace `static/img/logo.svg` *(Config updated, asset placed & correctly named)*
+  - [x] Generate and use new `static/img/favicon.ico` *(Config updated, asset placed)*
 
-- [ ] **Define & Implement Color Scheme**  
-  - [ ] Choose a primary and secondary color palette  
-  - [ ] Update CSS variables (`src/css/custom.css`):
+
+- [/] **Define & Implement Color Scheme**  
+  - [x] Choose a primary and secondary color palette  
+  - [/] Update CSS variables (`src/css/custom.css`): *(Initial implementation done, dark mode [x] & fine-tuning pending)*
     ```css
-    --ifm-color-primary: ...;
-    --ifm-color-primary-dark: ...;
+    --ifm-color-primary: #002147; /* Midnight Blue */
+    --ifm-color-primary-dark: #001b3a; /* Darker shade of Midnight Blue */
+
     ```
 
-- [ ] **Create Social Media Card**  
-  - [ ] Design a 1200x630px image with logo and tagline  
-  - [ ] Replace `static/img/docusaurus-social-card.jpg`
+- [x] **Create Social Media Card**  
+  - [x] Design a 1200x630px image with logo and tagline  
+  - [x] Replace `static/img/docusaurus-social-card.jpg` *(Config updated, asset pending)*
 
 **🏁 Milestone**:  
-The website consistently reflects the Praximous brand, with custom logo, color scheme, and accurate metadata, presenting a professional and cohesive identity.
+The website consistently reflects the Praximous brand, with custom logo, color scheme, and accurate metadata, presenting a professional and cohesive identity. *(Partially achieved)*
 
 ---
 
@@ -51,7 +53,7 @@ The website consistently reflects the Praximous brand, with custom logo, color s
 - [ ] **Rewrite Homepage Hero (`src/pages/index.js`)**  
   - [ ] Update `<HomepageHeader>` with new title & tagline  
   - [ ] Change CTA link text to `"Get Started in 5 Minutes"`  
-  - [ ] Update `to` prop to `"/docs/quick-start"`
+  - [ ] Update `to` prop to `"/docs/getting-started/quick-start"` *(Path updated due to doc restructure)*
 
 - [ ] **Customize Homepage Features (`src/components/HomepageFeatures/index.js`)**  
   - [ ] Replace default features with:
@@ -89,32 +91,35 @@ The homepage effectively educates visitors on what Praximous is, its key benefit
 
 ### Tasks:
 
-- [ ] **Restructure Documentation**  
-  - [ ] Delete: `docs/tutorial-basics`, `docs/tutorial-extras`
-  - [ ] Create:
+- [x] **Restructure Documentation**  
+  - [/] Delete: `docs/tutorial-basics`, `docs/tutorial-extras` *(Pending user action, but placeholders for new structure created)*
+  - [x] Create: *(Placeholder files created)*
     ```
+
     docs/
       getting-started/
       core-concepts/
       guides/
       api-reference/
     ```
-  - [ ] Move:
-    - `docs/intro.md` → `docs/getting-started/introduction.md`
-    - `docs/quick-start.md` → `docs/getting-started/quick-start.md`
+  - [/] Move: *(In progress)*
+    - [x] `docs/intro.md` → `docs/getting-started/introduction.md`
+    - [/] `docs/quick-start.md` → `docs/getting-started/quick-start.md` *(Pending user action)*
 
-- [ ] **Define Logical Sidebar (`sidebars.js`)**  
-  - [ ] Replace auto-generated sidebar with manual hierarchy
 
-- [ ] **Expand Core Guides**
-  - [ ] Revise `quick-start.md` into standalone guide  
-  - [ ] Write `core-concepts/architecture.md`  
-  - [ ] Write `guides/configuration.md` (covering `identity.yaml`, `providers.yaml`, `.env`)  
-  - [ ] Write `guides/licensing.md`  
-  - [ ] Write `guides/skill-development.md` (based on `SKILL_DEVELOPMENT_GUIDE.md`)
+- [x] **Define Logical Sidebar (`sidebars.js`)**  
+  - [x] Replace auto-generated sidebar with manual hierarchy
 
-- [ ] **Create API Reference**
-  - [ ] Write `api-reference/process-endpoint.md`
+
+- [/] **Expand Core Guides** *(Placeholders created, content pending)*
+  - [x] Write `core-concepts/architecture.md` *(Placeholder exists)*
+  - [x] Write `guides/configuration.md` (covering `identity.yaml`, `providers.yaml`, `.env`) *(Placeholder created)*
+  - [x] Write `guides/licensing.md` *(Placeholder created)*
+  - [x] Write `guides/skill-development.md` (based on `SKILL_DEVELOPMENT_GUIDE.md`) *(Placeholder with initial content created)*
+
+
+- [/] **Create API Reference** *(Placeholder created, content pending)*
+  - [x] Write `api-reference/process-endpoint.md` *(Placeholder created)*
     - Document `/api/v1/process` endpoint
     - Include:
       - Purpose

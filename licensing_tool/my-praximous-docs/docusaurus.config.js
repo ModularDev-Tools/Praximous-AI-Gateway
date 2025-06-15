@@ -85,21 +85,21 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: 'img/praximous-social-card.png', // Updated once custom card is created
       navbar: {
         // --- Please update this line ---
         title: 'Praximous', // UPDATED from 'My Site'
         // ---
         logo: {
           alt: 'Praximous Logo', // I've updated the alt text as well for consistency
-          src: 'img/my_logo.jpg',
+          src: 'img/logo.svg', // Updated to reflect roadmap's SVG logo
         },
         items: [
           {
             type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            sidebarId: 'docsSidebar', // Updated to use the new manual sidebar
             position: 'left',
-            label: 'Tutorial',
+            label: 'Docs', // Or 'Documentation' - to be updated with Phase 3 sidebar
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
@@ -116,8 +116,8 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Introduction', // To be updated with Phase 3 doc structure
+                to: '/docs/getting-started/introduction', // To be updated
               },
             ],
           },
@@ -125,16 +125,13 @@ const config = {
             title: 'Community',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                label: 'GitHub Discussions', // Example: Update per Phase 4
+                href: 'https://github.com/JamesTheGiblet/Praximous/discussions', // Example
               },
               {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
-              },
-              {
-                label: 'X',
-                href: 'https://x.com/docusaurus',
+                label: 'Discord', // Example: Update per Phase 4
+                href: 'YOUR_DISCORD_INVITE_LINK', // Example
+
               },
             ],
           },

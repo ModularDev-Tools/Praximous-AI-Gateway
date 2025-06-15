@@ -1,30 +1,53 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+/* Praximous Brand Colors
+   Primary: Midnight Blue (#002147)
+   Secondary: Amber (#FF9F1C)
+   Accent Gray: Dark Gray (#212529)
+   Accent Green: Teal Green (#1ABC9C)
+*/
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #002147; /* Midnight Blue */
+  --ifm-color-primary-dark: #001b3a; /* Darker shade of Midnight Blue */
+  --ifm-color-primary-darker: #00152e; /* Even darker shade */
+  --ifm-color-primary-darkest: #000e1f; /* Darkest shade */
+  --ifm-color-primary-light: #1a3c60; /* Lighter shade */
+  --ifm-color-primary-lighter: #33587a; /* Even lighter shade */
+  --ifm-color-primary-lightest: #4d7393; /* Lightest shade */
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Custom Praximous Colors */
+  --praximous-color-secondary: #FF9F1C; /* Amber */
+  --praximous-color-accent-gray: #212529; /* Dark Gray */
+  --praximous-color-accent-green: #1ABC9C; /* Teal Green */
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-}
+  /* You'll want to define appropriate dark mode shades for your primary color.
+     For example, a slightly lighter/more vibrant version of Midnight Blue might work well.
+     Or, you could use one of your accent colors as the primary in dark mode. */
+     --ifm-color-primary: #5c85ad; /* Example: A lighter blue for dark mode */
+     --ifm-color-primary-dark: #4a759f;
+     --ifm-color-primary-darker: #416a91;
+     --ifm-color-primary-darkest: #305170;
+     --ifm-color-primary-light: #6d95bb;
+     --ifm-color-primary-lighter: #7da5ca;
+     --ifm-color-primary-lightest: #96b8d7;
+     --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+   
+     /* You might also want to adjust your custom secondary/accent colors for dark mode if needed */
+     /* --praximous-color-secondary: #FFAA00; */ /* Example: slightly adjusted Amber */
+   }
+
+   .button--praximous-cta {
+    background-color: var(--praximous-color-secondary);
+    color: var(--ifm-color-primary-darkest); /* Or white, depending on contrast */
+    border-color: var(--praximous-color-secondary);
+  }
+  
+  .button--praximous-cta:hover {
+    background-color: #FFB74D; /* A lighter shade of Amber for hover */
+    border-color: #FFB74D;
+  }
