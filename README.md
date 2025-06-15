@@ -1,6 +1,6 @@
 # Praximous: A Secure, On-Premise AI Gateway
 
-**Version: 1.0 (MVP)**
+**Version: 1.0 (Commercially Viable MVP)**
 
 ## 🧠 Overview
 
@@ -17,13 +17,17 @@ Praximous is an intelligent, secure AI gateway for enterprises. It serves as a c
 
 ## ⚙️ Core MVP Features
 
-- **🧠 Smart Skill Platform**: Modular, business-specific logic units that run independently of LLMs (e.g., data transformation, simple calculations).
+- **🎨 Rich GUI**: An intuitive React-based web interface for task submission, system monitoring, analytics visualization, and skill exploration.
+- **🧠 Smart Skill Platform**: Develop and deploy modular, business-specific logic units that can operate independently or in conjunction with LLMs.
 - **🛡️ Resilient Failover Architecture**: Use a primary external LLM (e.g., Gemini), with automatic failover to a secondary provider (e.g., a local Ollama model) to ensure uptime.
 - **🏠 Secure On-Prem Deployment**: Fully containerized via Docker. No cloud dependencies—your data never leaves your environment.
 - **🔌 Pluggable Provider Architecture**: Supports multiple LLM providers. Add or switch models by editing a simple config file.
 - **📊 Analytics & Auditing**: Built-in SQLite logging for every API interaction, providing full traceability, usage tracking, and optimization insights via an analytics endpoint.
 - **🧵 Centralized API Gateway**: One stable, authenticated endpoint for all internal tools and applications.
 - **🎭 Context-Aware Persona**: Defines a unique identity (persona, industry context) for your gateway, ensuring all AI interactions are consistent with your business style.
+- **📜 Tiered Licensing System**: Feature flags and license verification to support different product tiers (e.g., Pro, Enterprise).
+- **📚 The Dojo (Documentation Portal)**: Comprehensive documentation including a Quick Start Guide and tutorials.
+- **📰 The Town Hall (Content Hub)**: A blog for product updates and articles.
 
 ## 🛠️ Tech Stack
 
@@ -31,6 +35,7 @@ Praximous is an intelligent, secure AI gateway for enterprises. It serves as a c
 - **API**: FastAPI
 - **Deployment**: Docker
 - **Database**: SQLite (for audit logging)
+- **Frontend GUI**: React
 
 ---
 
@@ -43,7 +48,7 @@ Praximous is an intelligent, secure AI gateway for enterprises. It serves as a c
 ### 2. Get the Code
 
 ```bash
-git clone [https://github.com/your-org/praximous.git](https://github.com/your-org/praximous.git)
+git clone [https://github.com/JamesTheGiblet/praximous.git](https://github.com/JamesTheGiblet/praximous.git)
 cd praximous
 ```
 

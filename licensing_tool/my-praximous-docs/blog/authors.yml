@@ -23,3 +23,15 @@ slorber:
     linkedin: sebastienlorber
     github: slorber
     newsletter: https://thisweekinreact.com
+
+JamesTheGiblet:
+  name: James The Giblet
+  title: Founder & Lead Developer of Praximous
+  url: https://github.com/JamesTheGiblet
+  image_url: https://github.com/JamesTheGiblet.png
+  page: true
+  socials:
+    x: JamesTheGiblet
+    linkedin: JamesTheGiblet
+    github: JamesTheGiblet
+    newsletter: https://thisweekinreact.com

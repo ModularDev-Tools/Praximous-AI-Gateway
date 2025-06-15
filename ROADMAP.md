@@ -165,7 +165,7 @@ Tasks:
 
         [✓] Implement the "Degraded Functionality" mode for expired licenses and the "Hard Stop" for invalid keys. (Degraded to Community tier on expiry/invalid key implemented in license_manager.py)
 
-    [>] Website: Automated Purchase & Provisioning: (MoR integrated, backend webhook signature verification implemented)
+    [✓] Website: Automated Purchase & Provisioning: (MoR integrated, backend webhook with signature verification and initial license delivery implemented)
 
         [✓] Integrate a Merchant of Record (e.g., Paddle) for checkout and global tax handling. (External setup and integration task)
 

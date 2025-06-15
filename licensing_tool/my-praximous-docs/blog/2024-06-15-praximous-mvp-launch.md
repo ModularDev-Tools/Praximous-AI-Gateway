@@ -37,8 +37,7 @@ This MVP release includes all the core features listed above, a functional React
 
 ## Getting Started
 
-Ready to take control of your enterprise AI? Head over to our [Quick Start Guide](/Praximous-Docs/docs/quick-start) to get your Praximous instance up and running!
-
+Ready to take control of your enterprise AI? Head over to our [Quick Start Guide](/docs/quick-start) to get your Praximous instance up and running!
 ## What's Next?
 
 This is just the beginning! We have an exciting roadmap ahead, including advanced RAG capabilities, deeper enterprise integrations, and enhanced administrative features. Stay tuned to this blog for more updates, tutorials, and insights into the world of secure AI orchestration.

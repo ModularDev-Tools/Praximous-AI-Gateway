@@ -8,12 +8,44 @@ hello:
   permalink: /hello
   description: Hello tag description
 
-docusaurus:
-  label: Docusaurus
-  permalink: /docusaurus
-  description: Docusaurus tag description
-
 hola:
   label: Hola
   permalink: /hola
   description: Hola tag description
+
+docusaurus:
+  label: Docusaurus
+  description: All things Docusaurus!
+  permalink: /docusaurus-guides
+
+product-update:
+  label: Product Update
+  description: Updates on new features and improvements.
+
+mvp:
+  label: MVP
+  description: Posts related to the Minimum Viable Product.
+
+launch:
+  label: Launch
+  description: Announcements about product launches.
+
+ai:
+  label: Artificial Intelligence
+  description: Topics related to AI.
+
+llm:
+  label: LLM
+  description: Topics related to Large Language Models.
+
+enterprise:
+  label: Enterprise
+  description: For enterprise customers.
+
+security:
+  label: Security
+  description: Posts about security features and best practices.
+
+on-premise:
+    label: On-Premise
+    description: Information about on-premise deployment.

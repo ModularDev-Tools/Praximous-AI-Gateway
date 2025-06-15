@@ -24,8 +24,8 @@ const config = {
   url: 'https://JamesTheGiblet.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/Praximous-Docs/', // Assuming your Docusaurus project/repo is named Praximous-Docs
-
+  baseUrl: '/praximous_mvp_scaffold/',
+  
   // Explicitly set trailingSlash to false for cleaner URLs, especially with GitHub Pages.
   // Or set to true if you prefer all URLs to end with a slash.
   trailingSlash: false,
@@ -33,7 +33,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'JamesTheGiblet', // Your GitHub org/user name.
-  projectName: 'Praximous-Docs', // Usually your repo name.
+  projectName: 'praximous_mvp_scaffold', // Your actual repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -56,7 +56,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/JamesTheGiblet/Praximous-Docs/tree/main/', // Point to your docs repo
+            'https://github.com/JamesTheGiblet/praximous_mvp_scaffold/tree/main/licensing_tool/my-praximous-docs/', // Point to your docs repo
         },
         blog: {
           showReadingTime: true,
@@ -68,7 +68,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/JamesTheGiblet/Praximous-Docs/tree/main/', // Point to your docs repo blog posts
+            'https://github.com/JamesTheGiblet/praximous_mvp_scaffold/tree/main/licensing_tool/my-praximous-docs/', // Point to your docs repo blog posts
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
