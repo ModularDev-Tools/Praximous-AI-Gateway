@@ -39,6 +39,22 @@ Praximous is an intelligent, secure AI gateway for enterprises. It serves as a c
 
 ---
 
+## 🌱 Development Journey: Challenges & Learnings
+
+Building Praximous has been a rewarding experience, filled with its share of technical hurdles. Here are a few notable challenges and how we navigated them:
+
+*   **Docker & Virtualization:** Early on, we encountered issues getting Docker to run correctly on a Windows development machine. This was traced back to virtualization support (like VSM or Intel VT-x/AMD-V) not being enabled in the system BIOS. Enabling this crucial setting was key to getting our containerized environment up and running smoothly.
+
+*   **Documentation Site Deployment:** Setting up and deploying our Docusaurus-based documentation site ("The Dojo") to GitHub Pages had its moments. We faced issues with author configurations and ensuring the correct Git user and repository URLs were used for deployment. Diligent cache clearing, careful configuration checks, and ensuring the `GIT_USER` environment variable was correctly set for Windows deployments were essential to resolve these.
+
+*   **API Key Management & Security:** Securely handling API keys for various LLM providers and for Praximous itself (for future API token authentication) required careful planning. We opted for environment variables (`.env` file) for storing sensitive keys, a separate `licensing_tool` for generating cryptographic license keys, and a robust verification module within Praximous.
+
+*   **Configuration Complexity:** Managing various configurations (identity, providers, skills) led to the adoption of YAML files and clear structures, along with CLI tools for initialization and management, to keep things organized and user-friendly.
+
+These experiences have reinforced the importance of thorough environment checks, meticulous configuration management, and the iterative nature of software development. Each challenge overcome has made Praximous a more robust and well-rounded platform.
+
+---
+
 ## 🚀 Quickstart: 5-Minute Setup
 
 ### 1. Prerequisites
