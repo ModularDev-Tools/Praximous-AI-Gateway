@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmy_praximous_docs=self.webpackChunkmy_praximous_docs||[]).push([[2721],{2700:o=>{o.exports=JSON.parse('{"metadata":{"permalink":"/praximous_mvp_scaffold/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":5,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

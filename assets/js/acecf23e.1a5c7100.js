@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmy_praximous_docs=self.webpackChunkmy_praximous_docs||[]).push([[1903],{1912:s=>{s.exports=JSON.parse('{"blogBasePath":"/praximous_mvp_scaffold/blog","blogTitle":"Blog","authorsListPath":"/praximous_mvp_scaffold/blog/authors"}')}}]);
