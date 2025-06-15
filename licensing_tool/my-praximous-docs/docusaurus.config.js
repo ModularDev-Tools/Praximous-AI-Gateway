@@ -10,8 +10,8 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Praximous: The Dojo',
-  tagline: 'Secure, On-Premise AI Gateway - Documentation & Guides',
+  title: 'Praximous | Secure AI Gateway',
+  tagline: 'Your On-Premise Orchestration Layer for Enterprise AI.',
  
   favicon: 'img/favicon.ico',
 
@@ -87,10 +87,12 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: 'My Site',
+        // --- Please update this line ---
+        title: 'Praximous', // UPDATED from 'My Site'
+        // ---
         logo: {
-          alt: 'My Site Logo',
-          src: 'img/logo.svg',
+          alt: 'Praximous Logo', // I've updated the alt text as well for consistency
+          src: 'img/my_logo.jpg',
         },
         items: [
           {
@@ -150,7 +152,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Praximous (JamesTheGiblet). Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Praximous. All rights reserved.`,
       },
       prism: {
         theme: prismThemes.github,
