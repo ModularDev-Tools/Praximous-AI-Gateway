@@ -5,7 +5,7 @@ import styles from './styles.module.css';
 const FeatureList = [
   {
     title: 'Secure On-Premise Gateway',
-    Svg: require('@site/static/img/shield.svg').default, // Updated path
+    Svg: require('@site/static/img/shield.svg').default,
     description: 'Keep your data in your environment. Praximous acts as a central, secure orchestration layer, preventing sensitive information from being exposed to third-party services.',
   },
   {

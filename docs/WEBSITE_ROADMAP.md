@@ -37,7 +37,7 @@ Overhaul the Docusaurus website to replace all placeholder content with custom b
 
 - [x] **Create Social Media Card**  
   - [x] Design a 1200x630px image with logo and tagline  
-  - [x] Replace `static/img/docusaurus-social-card.jpg` *(Config updated, asset pending)*
+  - [x] Replace `static/img/docusaurus-social-card.jpg` *(Config updated, asset 'praximous-social-card.png' placed)*
 
 **🏁 Milestone**:  
 The website consistently reflects the Praximous brand, with custom logo, color scheme, and accurate metadata, presenting a professional and cohesive identity. *(Partially achieved)*
