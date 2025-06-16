@@ -15,7 +15,7 @@ const FeatureList = [
   },
   {
     title: 'Extensible Smart Skills',
-    Svg: require('@site/static/img/puzzle_gears.svg').default, // Updated path
+    Svg: require('@site/static/img/puzzle_pieces.svg').default, // Updated path
     description: 'Go beyond simple LLM calls. Build modular, reusable logic units—Smart Skills—to automate complex business processes and create powerful, context-aware workflows.',
   },
 ];
