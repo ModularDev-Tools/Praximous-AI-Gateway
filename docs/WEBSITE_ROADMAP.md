@@ -104,22 +104,23 @@ The homepage effectively educates visitors on what Praximous is, its key benefit
     ```
   - [/] Move: *(In progress)*
     - [x] `docs/intro.md` → `docs/getting-started/introduction.md`
-    - [/] `docs/quick-start.md` → `docs/getting-started/quick-start.md` *(Pending user action)*
+    - [x] `docs/quick-start.md` → `docs/getting-started/quick-start.md` *(Revision complete)*
 
 
 - [x] **Define Logical Sidebar (`sidebars.js`)**  
   - [x] Replace auto-generated sidebar with manual hierarchy
 
 
-- [/] **Expand Core Guides** *(Placeholders created, content pending)*
-  - [x] Write `core-concepts/architecture.md` *(Placeholder exists)*
-  - [x] Write `guides/configuration.md` (covering `identity.yaml`, `providers.yaml`, `.env`) *(Placeholder created)*
-  - [x] Write `guides/licensing.md` *(Placeholder created)*
-  - [x] Write `guides/skill-development.md` (based on `SKILL_DEVELOPMENT_GUIDE.md`) *(Placeholder with initial content created)*
+- [x] **Expand Core Guides** *(Content fleshed out)*
+  - [x] Revise `quick-start.md` into standalone guide
+  - [x] Write `core-concepts/architecture.md` *(Content fleshed out)*
+  - [x] Write `guides/configuration.md` (covering `identity.yaml`, `providers.yaml`, `.env`) *(Content fleshed out)*
+  - [x] Write `guides/licensing.md` *(Content fleshed out)*
+  - [x] Write `guides/skill-development.md` (based on `SKILL_DEVELOPMENT_GUIDE.md`) *(Content fleshed out)*
 
 
-- [/] **Create API Reference** *(Placeholder created, content pending)*
-  - [x] Write `api-reference/process-endpoint.md` *(Placeholder created)*
+- [x] **Create API Reference** *(Content fleshed out for /process endpoint)*
+  - [x] Write `api-reference/process-endpoint.md` *(Content fleshed out)*
     - Document `/api/v1/process` endpoint
     - Include:
       - Purpose
@@ -128,7 +129,7 @@ The homepage effectively educates visitors on what Praximous is, its key benefit
       - Task type examples
 
 **🏁 Milestone**:  
-Documentation is clear, structured, and practical—accelerating onboarding and deep adoption.
+Documentation is clear, structured, and practical—accelerating onboarding and deep adoption. *(Achieved)*
 
 ---
 

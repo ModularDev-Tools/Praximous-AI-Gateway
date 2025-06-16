@@ -126,7 +126,7 @@ const config = {
             items: [
               {
                 label: 'GitHub Discussions', // Example: Update per Phase 4
-                href: 'https://github.com/JamesTheGiblet/Praximous/discussions', // Example
+                href: 'https://github.com/JamesTheGiblet/praximous_mvp_scaffold/discussions/2', // Example
               },
               {
                 label: 'Discord', // Example: Update per Phase 4
