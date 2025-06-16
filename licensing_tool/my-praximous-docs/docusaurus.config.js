@@ -90,9 +90,9 @@ const config = {
         // --- Please update this line ---
         title: 'Praximous', // UPDATED from 'My Site'
         // ---
-        logo: {
+      logo: {
           alt: 'Praximous Logo', // I've updated the alt text as well for consistency
-          src: 'img/logo.svg', // Updated to reflect roadmap's SVG logo
+          src: 'img/my_logo.svg', // Updated to reflect roadmap's SVG logo
         },
         items: [
           {
