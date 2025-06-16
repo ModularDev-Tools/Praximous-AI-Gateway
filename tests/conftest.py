@@ -4,7 +4,8 @@ import httpx
 import sys
 import os
 import pytest_asyncio # Import for the decorator
-from typing import AsyncGenerator, Set, Optional
+from typing import AsyncGenerator, Set, Optional # Keep Set and Optional
+import warnings # Import the warnings module
 
 # --- Eager sys.path modification ---
 # This will run as soon as conftest.py is loaded by pytest,
@@ -29,7 +30,14 @@ def add_project_root_to_path():
     if project_root not in sys.path:
         # This might be redundant if the eager modification above works,
         # but it's kept for explicitness and good practice.
+            # Note: This fixture itself doesn't need to return anything.
+            # Its purpose is to modify sys.path.
         sys.path.insert(0, project_root)
+
+        # Filter specific DeprecationWarnings from google._upb
+        warnings.filterwarnings("ignore", message="Type google\\._upb\\._message\\.MessageMapContainer uses PyType_Spec", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", message="Type google\\._upb\\._message\\.ScalarMapContainer uses PyType_Spec", category=DeprecationWarning)
+
 
 @pytest.fixture(scope="session")
 def anyio_backend():

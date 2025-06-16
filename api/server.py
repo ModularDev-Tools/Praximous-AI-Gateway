@@ -12,10 +12,14 @@ from core.model_router import model_router, NoAvailableProviderError
 from core.audit_logger import (
     log_interaction,
     get_all_interactions,
-    count_interactions
+    count_interactions,
+    get_tasks_over_time_data,
+    get_requests_per_provider_data,
+    get_average_latency_per_provider_data
 )
 # NEW: Import the security validator
 from core.security import validate_api_key
+from api.v1.endpoints import rag_interface_router # Import the RAG router
 
 # ... (ProcessRequest and ProcessResponse models are unchanged) ...
 class ArbitraryKwargsBaseModel(BaseModel):
@@ -49,6 +53,30 @@ class AnalyticsResponse(BaseModel):
     offset: int
     data: List[InteractionRecord]
 
+# --- Pydantic models for new Advanced Analytics endpoints ---
+class TasksOverTimeDataPoint(BaseModel):
+    date_group: str # e.g., "YYYY-MM-DD" or "YYYY-MM" or "YYYY"
+    count: int
+
+class TasksOverTimeResponse(BaseModel):
+    data: List[TasksOverTimeDataPoint]
+
+class RequestsPerProviderDataPoint(BaseModel):
+    provider_name: str
+    count: int
+
+class RequestsPerProviderResponse(BaseModel):
+    data: List[RequestsPerProviderDataPoint]
+
+class AverageLatencyPerProviderDataPoint(BaseModel):
+    provider_name: str
+    average_latency: float # SQLite AVG returns float
+
+class AverageLatencyPerProviderResponse(BaseModel):
+    data: List[AverageLatencyPerProviderDataPoint]
+
+# --- End Pydantic models ---
+
 # --- MODIFIED: Add a dependencies list to the FastAPI app instance ---
 app = FastAPI(
     title="Praximous API",
@@ -56,6 +84,23 @@ app = FastAPI(
     description="Secure, On-Premise AI Gateway",
     dependencies=[Depends(validate_api_key)] # This protects ALL endpoints in the app
 )
+
+# --- Licensing Dependency for Advanced Features ---
+from core.license_manager import is_feature_enabled, Feature, get_current_license_tier
+from fastapi import status # For status codes
+
+async def verify_advanced_analytics_access():
+    """Dependency to check Advanced Analytics UI feature access."""
+    if not is_feature_enabled(Feature.ADVANCED_ANALYTICS_UI):
+        current_tier_name = get_current_license_tier().name
+        log.warning(f"Advanced Analytics access denied. Current tier: {current_tier_name}. Required for feature: {Feature.ADVANCED_ANALYTICS_UI.name}")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Advanced Analytics feature is not available for your current license tier ({current_tier_name}). Please upgrade."
+        )
+
+# Include the RAG router
+app.include_router(rag_interface_router.router, prefix="/api/v1") # Ensure prefix matches other v1 routes
 
 # --- All endpoints below are now automatically protected ---
 
@@ -180,3 +225,63 @@ async def get_skill_capabilities(skill_name: str,
         log.error(f"Error getting capabilities for skill {skill_name}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not retrieve skill capabilities.")
 # --- END API ENDPOINTS ---
+
+# --- NEW Advanced Analytics Endpoints (Phase 5) ---
+
+@app.get(
+    "/api/v1/analytics/tasks-over-time",
+    response_model=TasksOverTimeResponse,
+    summary="Get task counts aggregated over time periods",
+    dependencies=[Depends(verify_advanced_analytics_access)]
+)
+async def get_tasks_over_time_analytics(
+    start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    granularity: str = Query("day", description="Time granularity: 'day', 'month', or 'year'")
+):
+    if granularity not in ["day", "month", "year"]:
+        raise HTTPException(status_code=400, detail="Invalid granularity. Must be 'day', 'month', or 'year'.")
+    try:
+        data = get_tasks_over_time_data(start_date=start_date, end_date=end_date, granularity=granularity)
+        return TasksOverTimeResponse(data=data)
+    except Exception as e:
+        log.error(f"Failed to retrieve tasks over time data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve tasks over time data.")
+
+@app.get(
+    "/api/v1/analytics/requests-per-provider",
+    response_model=RequestsPerProviderResponse,
+    summary="Get total request counts per provider",
+    dependencies=[Depends(verify_advanced_analytics_access)]
+)
+async def get_requests_per_provider_analytics(
+    start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+):
+    try:
+        data = get_requests_per_provider_data(start_date=start_date, end_date=end_date)
+        return RequestsPerProviderResponse(data=data)
+    except Exception as e:
+        log.error(f"Failed to retrieve requests per provider data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve requests per provider data.")
+
+@app.get(
+    "/api/v1/analytics/average-latency-per-provider",
+    response_model=AverageLatencyPerProviderResponse,
+    summary="Get average request latency per provider",
+    dependencies=[Depends(verify_advanced_analytics_access)]
+)
+async def get_average_latency_per_provider_analytics(
+    start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+):
+    try:
+        data = get_average_latency_per_provider_data(start_date=start_date, end_date=end_date)
+        # Ensure average_latency is float or None
+        for item in data:
+            if item.get("average_latency") is not None:
+                item["average_latency"] = float(item["average_latency"])
+        return AverageLatencyPerProviderResponse(data=data)
+    except Exception as e:
+        log.error(f"Failed to retrieve average latency per provider data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not retrieve average latency per provider data.")
