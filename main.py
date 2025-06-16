@@ -3,8 +3,10 @@ import sys
 import os
 import yaml
 from api.v1.endpoints import rag_interface_router # Import the new RAG router
+import argparse
+import secrets # For generating secure API keys
 
-from core.logger import log # Import the configured logger
+from core.logger import log
 from config.credentials_manager import setup_api_credentials, get_missing_provider_credentials
 
 CONFIG_DIR = 'config'
@@ -68,34 +70,44 @@ def reset_identity_config():
     else:
         log.info("Identity reset cancelled.")
 
+def generate_api_key():
+    """Generates a new secure API key."""
+    new_key = secrets.token_hex(32) # Generates a 64-character hex string
+    log.info("Generated new API Key. Please add this to your PRAXIMOUS_API_KEYS environment variable:")
+    print(f"\n{new_key}\n")
+    log.info("If you have multiple keys, separate them with a comma in your .env file.")
+
 def main():
-    if '--init' in sys.argv:
+    parser = argparse.ArgumentParser(description="Praximous AI Gateway CLI")
+    parser.add_argument('--init', action='store_true', help="Initialize Praximous identity and API credentials.")
+    parser.add_argument('--rename', type=str, metavar='NEW_NAME', help="Rename the system in identity.yaml.")
+    parser.add_argument('--reset-identity', action='store_true', help="Reset the system identity by removing identity.yaml.")
+    parser.add_argument('--generate-api-key', action='store_true', help="Generate a new secure API key.")
+
+    args = parser.parse_args()
+
+    if args.init:
         init_identity()
+        return
+
+    if args.rename:
+        rename_system(args.rename)
+        return
+
+    if args.reset_identity:
+        reset_identity_config()
+        return
+
+    if args.generate_api_key:
+        generate_api_key()
         return
 
     # Default action: Start the API server
     log.info("Attempting to start Praximous API server...")
     if not os.path.exists(CONFIG_PATH):
-        log.error("Identity not initialized. Run `python main.py --init` to setup.")
+        log.error("Identity not initialized. Run `python main.py --init` to set up.")
         log.error("API server will not start without an identity.")
         return
-    
-    # Handle --rename argument
-    if '--rename' in sys.argv:
-        try:
-            rename_idx = sys.argv.index('--rename')
-            if len(sys.argv) > rename_idx + 1:
-                new_name_arg = sys.argv[rename_idx + 1]
-                rename_system(new_name_arg)
-            else:
-                log.error("No new name provided for --rename. Usage: python main.py --rename \"New-System-Name\"")
-        except ValueError:
-            pass # Should not happen if '--rename' is in sys.argv
-        return # Exit after rename attempt
-
-    if '--reset-identity' in sys.argv:
-        reset_identity_config()
-        return # Exit after reset attempt
 
     # Check for missing required credentials based on providers.yaml
     missing_keys = get_missing_provider_credentials()
@@ -103,28 +115,33 @@ def main():
         log.warning("The following required API keys/environment variables are missing or empty in your .env file:")
         for key in missing_keys:
             log.warning(f"  - {key}")
-        log.warning("Praximous will attempt to start, but functionality requiring these keys may be limited or fall back to local providers if configured.")
-        log.warning(f"Please ensure these environment variables are set. They can be configured in your .env file or directly in your container's environment.")
-
+        log.warning(
+            "Praximous will attempt to start, but functionality requiring these keys may be limited "
+            "or fall back to local providers if configured."
+        )
+        log.warning(
+            "Please ensure these environment variables are set. They can be configured in your .env file "
+            "or directly in your container's environment."
+        )
     try:
         import uvicorn
+        from dotenv import load_dotenv
+        load_dotenv() # Load .env file for Uvicorn development server and API key access
 
         # Configure Uvicorn reload behavior
         # Enabled by default for local development.
         # Can be disabled by setting the UVICORN_RELOAD environment variable to "false".
         uvicorn_reload_env = os.getenv("UVICORN_RELOAD", "true").lower()
         reload_enabled = uvicorn_reload_env == "true"
+        log_level_env = os.getenv("LOG_LEVEL", "info").lower()
 
-        log_level = "info"
         if reload_enabled:
             log.info("Starting Uvicorn server with auto-reload enabled (development mode).")
         else:
             log.info("Starting Uvicorn server with auto-reload disabled (production mode).")
-            # Optionally, adjust log level for production
-            # log_level = "warning" 
 
         # We assume api.server:app points to your FastAPI application instance
-        uvicorn.run("api.server:app", host="0.0.0.0", port=8000, reload=reload_enabled, log_level=log_level)
+        uvicorn.run("api.server:app", host="0.0.0.0", port=8000, reload=reload_enabled, log_level=log_level_env)
     except ImportError:
         log.critical("Uvicorn is not installed. Please install it with: pip install uvicorn[standard]")
     except Exception as e:

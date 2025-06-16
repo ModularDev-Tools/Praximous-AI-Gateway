@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import datetime, timezone # Import timezone
 from typing import Optional, Dict, Any, List
+import json # Import json for serializing response_data
 from core.logger import log
 
 LOGS_DIR = "logs"
@@ -21,6 +22,7 @@ def init_db():
                     timestamp TEXT NOT NULL,
                     task_type TEXT NOT NULL,
                     provider TEXT,
+                    api_key TEXT,
                     status TEXT NOT NULL,
                     latency_ms INTEGER,
                     prompt TEXT,
@@ -39,28 +41,38 @@ def log_interaction(
     task_type: str,
     status: str,
     latency_ms: int,
-    provider: Optional[str] = None,
+    provider: Optional[str] = None, # Name of the LLM provider or skill
+    api_key: Optional[str] = None,  # API key used for the request
     prompt: Optional[str] = None,
     response_data: Optional[Dict[str, Any]] = None
 ):
     try:
+        # Serialize response_data to JSON string if it's a dict or list
+        response_data_str: Optional[str] = None
+        if isinstance(response_data, (dict, list)):
+            response_data_str = json.dumps(response_data)
+        elif response_data is not None: # For other types, convert to string
+            response_data_str = str(response_data)
+
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO interactions (request_id, timestamp, task_type, provider, status, latency_ms, prompt, response_data)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO interactions (request_id, timestamp, task_type, provider, api_key, status, latency_ms, prompt, response_data)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 request_id,
                 datetime.now(timezone.utc).isoformat(), # Corrected to timezone.utc
                 task_type,
                 provider,
-                status,
+                api_key, # Correctly pass the api_key variable here
+                status, # Status is now in the correct position
                 latency_ms,
                 prompt,
-                str(response_data) if response_data else None
+                response_data_str
             ))
             conn.commit()
-            log.info(f"Successfully logged interaction for request_id: {request_id}")
+            # Log a snippet of the API key for security if it exists
+            log.info(f"Successfully logged interaction for request_id: {request_id}, API Key: {api_key[:10] + '...' if api_key and len(api_key) > 10 else api_key if api_key else 'N/A'}")
     except Exception as e:
         log.error(f"Failed to log interaction for request_id {request_id}: {e}", exc_info=True)
 
@@ -83,7 +95,8 @@ def get_all_interactions(
 
     # Validate sort_by to prevent SQL injection and ensure it's a valid column
     allowed_sort_columns = ["id", "request_id", "timestamp", "task_type", "provider", "status", "latency_ms"]
-    if sort_by and sort_by not in allowed_sort_columns:
+    # api_key is intentionally not in allowed_sort_columns for public analytics
+    if sort_by and sort_by not in allowed_sort_columns :
         sort_by = "timestamp" # Default to timestamp if invalid column is provided
 
     try:
@@ -92,7 +105,8 @@ def get_all_interactions(
             cursor = conn.cursor()
 
             # Base query
-            query = "SELECT * FROM interactions"
+            # Select specific columns to avoid exposing api_key through this general analytics function
+            query = "SELECT id, request_id, timestamp, task_type, provider, status, latency_ms, prompt, response_data FROM interactions"
             conditions = []
             params = []
 
@@ -260,5 +274,3 @@ def get_average_latency_per_provider_data(
     except Exception as e:
         log.error(f"Failed to fetch average latency per provider data: {e}", exc_info=True)
     return records
-
-init_db()

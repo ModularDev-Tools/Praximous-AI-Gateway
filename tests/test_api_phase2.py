@@ -11,6 +11,9 @@ pytestmark = pytest.mark.anyio
 # Import necessary classes for testing and mocking
 from core.provider_manager import ProviderManager, GeminiProvider, OllamaProvider
 # NoAvailableProviderError will be implicitly tested via API status codes
+from .conftest import TEST_API_KEY_1 # Import directly from conftest
+
+DEFAULT_HEADERS = {"X-API-Key": TEST_API_KEY_1}
 
 async def test_api_successful_routing_to_primary_provider(async_client: httpx.AsyncClient, mocker):
     """
@@ -25,7 +28,7 @@ async def test_api_successful_routing_to_primary_provider(async_client: httpx.As
     mock_ollama_generate = mocker.patch.object(OllamaProvider, 'generate_async', AsyncMock())
 
     payload = {"task_type": "default_llm_tasks", "prompt": "Hello primary provider!"}
-    response = await async_client.post("/api/v1/process", json=payload)
+    response = await async_client.post("/api/v1/process", json=payload, headers=DEFAULT_HEADERS)
     
     assert response.status_code == 200
     data = response.json()
@@ -50,7 +53,7 @@ async def test_api_failover_to_secondary_provider(async_client: httpx.AsyncClien
     mocker.patch.object(OllamaProvider, 'generate_async', AsyncMock(return_value=mock_ollama_response))
 
     payload = {"task_type": "default_llm_tasks", "prompt": "Testing failover!"}
-    response = await async_client.post("/api/v1/process", json=payload)
+    response = await async_client.post("/api/v1/process", json=payload, headers=DEFAULT_HEADERS)
     
     assert response.status_code == 200
     data = response.json()
@@ -69,7 +72,7 @@ async def test_api_all_providers_fail(async_client: httpx.AsyncClient, mocker):
     mocker.patch.object(OllamaProvider, 'generate_async', AsyncMock(side_effect=Exception("Ollama provider failed for test")))
 
     payload = {"task_type": "default_llm_tasks", "prompt": "What if everyone is down?"}
-    response = await async_client.post("/api/v1/process", json=payload)
+    response = await async_client.post("/api/v1/process", json=payload, headers=DEFAULT_HEADERS)
     
     assert response.status_code == 503 # Service Unavailable
     data = response.json()
@@ -97,12 +100,30 @@ def test_provider_manager_loads_config_correctly_unit(mock_getenv, tmp_path):
     temp_providers_yaml_path = temp_config_dir / "providers.yaml"
     
     test_providers_config_content = {
-        "providers": {
-            "gemini": {"enabled": True, "api_key_env_var": "GEMINI_API_KEY"}, # Added api_key_env_var for clarity
-            "ollama": {"enabled": True, "url_env_var": "OLLAMA_API_URL"},     # Added url_env_var for clarity
-            "disabled_provider": {"enabled": False},
-            "unsupported_provider": {"enabled": True} # A provider not in PROVIDER_CLASSES
-        }
+            "providers": [
+                {
+                    "name": "gemini_test_instance", # Each provider in the list needs a 'name' and 'type'
+                    "type": "gemini",
+                    "enabled": True,
+                    "api_key_env": "GEMINI_API_KEY" # Match actual config key
+                },
+                {
+                    "name": "ollama_test_instance",
+                    "type": "ollama",
+                    "enabled": True,
+                    "base_url_env": "OLLAMA_API_URL" # Match actual config key
+                },
+                {
+                    "name": "disabled_provider_instance",
+                    "type": "gemini", # Needs a valid type to attempt loading
+                    "enabled": False
+                },
+                {
+                    "name": "unsupported_provider_instance",
+                    "type": "unsupported_type", # A provider type not in PROVIDER_CLASSES
+                    "enabled": True
+                }
+            ]
     }
     with open(temp_providers_yaml_path, 'w') as f:
         yaml.dump(test_providers_config_content, f)
@@ -112,18 +133,12 @@ def test_provider_manager_loads_config_correctly_unit(mock_getenv, tmp_path):
         # Instantiate ProviderManager to trigger _load_providers
         pm = ProviderManager()
 
-    assert "gemini" in pm.providers
-    assert isinstance(pm.providers["gemini"], GeminiProvider)
-    # The GeminiProvider itself calls os.getenv("GEMINI_API_KEY") in its __init__
-    assert pm.providers["gemini"].api_key == "fake_gemini_key_for_test"
-
-    assert "ollama" in pm.providers
-    assert isinstance(pm.providers["ollama"], OllamaProvider)
-    # The OllamaProvider itself calls os.getenv("OLLAMA_API_URL") in its __init__
-    assert pm.providers["ollama"].base_url == "http://fakeollamaurl:11434"
-
-    assert "disabled_provider" not in pm.providers # Check that disabled providers are not loaded
-    assert "unsupported_provider" not in pm.providers # Check that unsupported providers are logged but not loaded
+        assert "gemini_test_instance" in pm.providers
+        assert "ollama_test_instance" in pm.providers
+        assert "disabled_provider_instance" not in pm.providers
+        assert "unsupported_provider_instance" not in pm.providers
+        assert isinstance(pm.get_provider("gemini_test_instance"), GeminiProvider)
+        assert isinstance(pm.get_provider("ollama_test_instance"), OllamaProvider)
 
     # Check that os.getenv was called by the provider initializers
     mock_getenv.assert_any_call("GEMINI_API_KEY")

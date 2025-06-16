@@ -4,11 +4,7 @@ from typing import Dict, Set
 from core.logger import log
 import os # For a temporary mock license tier
 from core.license import get_active_license_info # Import the new license verification
-
-class LicenseTier(Enum):
-    COMMUNITY = "community" # Or Free/Basic
-    PRO = "pro"
-    ENTERPRISE = "enterprise"
+from .enums import LicenseTier # Import LicenseTier from the new enums.py
 
 class Feature(Enum):
     # Core features available to all

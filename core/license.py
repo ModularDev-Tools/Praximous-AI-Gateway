@@ -12,7 +12,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 
 from core.logger import log
-from core.license_manager import LicenseTier # For tier validation
+from .enums import LicenseTier # Import LicenseTier from the new enums.py
 
 PUBLIC_KEY_NAME = "praximous_signing_public.pem"
 CONFIG_DIR = "config"
